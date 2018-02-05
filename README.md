@@ -18,7 +18,6 @@ Highlight:
   * In order for this step to work correctly, the chromosome names (sequence headers) in the FASTA reference genome file must be the same as the first column of GFF3 annotation file.
   (2) The reference annotation file in GFF3 format can be downloaded from Ensembl Plants.
 
-	------------------
 	Example GFF3 file
 	------------------
 	##gff-version 3
@@ -26,19 +25,24 @@ Highlight:
 	#!genome-version Pmarinus_7.0
 	#!genome-date 2011-01
 	#!genebuild-last-updated 2013-04
-	GL476399        Pmarinus_7.0    supercontig     1       4695893 .       .       .       ID=supercontig:GL476399;Alias=scaffold_71
-	GL476399        ensembl gene    2596494 2601138 .       +       .       ID=gene:ENSPMAG00000009070;Name=TRYPA3;biotype=protein_coding;description=Trypsinogen A1%3B Trypsinogen a3%3B Uncharacterized protein  [Source:UniProtKB/TrEMBL%3BAcc:O42608];logic_name=ensembl;version=1
-	GL476399        ensembl transcript      2596494 2601138 .       +       .       ID=transcript:ENSPMAT00000010026;Name=TRYPA3-201;Parent=gene:ENSPMAG00000009070;biotype=protein_coding;version=1
-	GL476399        ensembl exon    2596494 2596538 .       +       .       Name=ENSPMAE00000087923;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=1;ensembl_phase=-1;rank=1;version=1
-	GL476399        ensembl exon    2598202 2598361 .       +       .       Name=ENSPMAE00000087929;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=2;ensembl_phase=1;rank=2;version=1
-	GL476399        ensembl exon    2599023 2599282 .       +       .       Name=ENSPMAE00000087937;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=1;ensembl_phase=2;rank=3;version=1
-	GL476399        ensembl exon    2599814 2599947 .       +       .       Name=ENSPMAE00000087952;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=0;ensembl_phase=1;rank=4;version=1
-	GL476399        ensembl exon    2600895 2601138 .       +       .       Name=ENSPMAE00000087966;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=-1;ensembl_phase=0;rank=5;version=1
-	GL476399        ensembl CDS     2596499 2596538 .       +       0       ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
-	GL476399        ensembl CDS     2598202 2598361 .       +       2       ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
-	GL476399        ensembl CDS     2599023 2599282 .       +       1       ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
-	GL476399        ensembl CDS     2599814 2599947 .       +       2       ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
-	GL476399        ensembl CDS     2600895 2601044 .       +       0       ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
+		##gff-version 3
+	#!genome-build  Pmarinus_7.0
+	#!genome-version Pmarinus_7.0
+	#!genome-date 2011-01
+	#!genebuild-last-updated 2013-04
+	GL476399 Pmarinus_7.0 supercontig 1 4695893 . . . ID=supercontig:GL476399;Alias=scaffold_71
+	GL476399 ensembl gene 2596494 2601138 . + . ID=gene:ENSPMAG00000009070;Name=TRYPA3;biotype=protein_coding;description=Trypsinogen A1%3B Trypsinogen a3%3B Uncharacterized protein [Source:UniProtKB/TrEMBL%3BAcc:O42608];logic_name=ensembl;version=1
+	GL476399 ensembl transcript 2596494 2601138 . + . ID=transcript:ENSPMAT00000010026;Name=TRYPA3-201;Parent=gene:ENSPMAG00000009070;biotype=protein_coding;version=1
+	GL476399 ensembl exon 2596494 2596538 . + . Name=ENSPMAE00000087923;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=1;ensembl_phase=-1;rank=1;version=1
+	GL476399 ensembl exon 2598202 2598361 . + . Name=ENSPMAE00000087929;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=2;ensembl_phase=1;rank=2;version=1
+	GL476399 ensembl exon 2599023 2599282 . + . Name=ENSPMAE00000087937;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=1;ensembl_phase=2;rank=3;version=1
+	GL476399 ensembl exon 2599814 2599947 . + . Name=ENSPMAE00000087952;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=0;ensembl_phase=1;rank=4;version=1
+	GL476399 ensembl exon 2600895 2601138 . + . Name=ENSPMAE00000087966;Parent=transcript:ENSPMAT00000010026;constitutive=1;ensembl_end_phase=-1;ensembl_phase=0;rank=5;version=1
+	GL476399 ensembl CDS 2596499 2596538 . + 0 ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
+	GL476399 ensembl CDS 2598202 2598361 . + 2 ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
+	GL476399 ensembl CDS 2599023 2599282 . + 1 ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
+	GL476399 ensembl CDS 2599814 2599947 . + 2 ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
+	GL476399 ensembl CDS 2600895 2601044 . + 0 ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
 
 2. How to run CRISPR-Local
 
@@ -148,7 +152,7 @@ Highlight:
 
 	ZmC01.gene.sgRNA.db.fasta.txt
         
-	      chr1    +1124   0.1066  TAATCAAATAAATAAGTTTATGG
+	chr1    +1124   0.1066  TAATCAAATAAATAAGTTTATGG
         chr1    +1279   0.3327  AGTAATACATTCTTATAAAATGG
         chr1    +1368   0.3355  TAAATGAGATGTTGAATTAGAGG
         chr1    +1428   0.4202  GAGTCAGTGTCGTTATGTTATGG
@@ -193,7 +197,7 @@ Highlight:
      
       Example:
      ----------------------------
-    	perl PL-search -l ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/
+      perl PL-search -l ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/
       
       Output of this command
       Paralog_search_result_common.txt
