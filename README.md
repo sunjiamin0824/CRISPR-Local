@@ -14,18 +14,12 @@ Highlight:
 1.Prepare CRISPR-Local input (fasta/genome) files
 
   (1) Reference genome fasta file, can be downloaded from Ensembl Plants or NCBI or other source.
-	* Before perform CRISPR-Local program, multiple fasta files need be combined into one big fasta file by using cat command.
-  * In order for this step to work correctly, the chromosome names (sequence headers) in the FASTA reference genome file must be the same as the first column of GFF3 annotation file.
+     * Before perform CRISPR-Local program, multiple fasta files need be combined into one big fasta file by using cat command.
+     * In order for this step to work correctly, the chromosome names (sequence headers) in the FASTA reference genome file must be the same as the first column of GFF3 annotation file.
   (2) The reference annotation file in GFF3 format can be downloaded from Ensembl Plants.
-
 	Example GFF3 file
-	------------------
+	
 	##gff-version 3
-	#!genome-build  Pmarinus_7.0
-	#!genome-version Pmarinus_7.0
-	#!genome-date 2011-01
-	#!genebuild-last-updated 2013-04
-		##gff-version 3
 	#!genome-build  Pmarinus_7.0
 	#!genome-version Pmarinus_7.0
 	#!genome-date 2011-01
@@ -43,7 +37,7 @@ Highlight:
 	GL476399 ensembl CDS 2599023 2599282 . + 1 ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
 	GL476399 ensembl CDS 2599814 2599947 . + 2 ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
 	GL476399 ensembl CDS 2600895 2601044 . + 0 ID=CDS:ENSPMAP00000009982;Parent=transcript:ENSPMAT00000010026
-
+	
 2. How to run CRISPR-Local
 
   (1) progam RD-build:
