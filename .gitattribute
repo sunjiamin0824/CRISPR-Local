@@ -1,4 +1,5 @@
 *.py linguist-language=perl
+*.pl linguist-language=perl
 *.pyc linguist-language=perl
 *.pkl linguist-language=perl
 *.pickle linguist-language=perl
