@@ -35,7 +35,7 @@ e.g.,
 
 	or
 
-	perl $0 -l ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/ -N 3
+	perl $0 -l ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/
 
 	
 --- Options ---
