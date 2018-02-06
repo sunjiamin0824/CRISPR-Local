@@ -90,78 +90,78 @@ Column 11:	The highest CFD score between sgRNA and all off-target sites.
 * If your file is Bam or Sam format, the annotation file in GFF3 format is needed to be specified.
 * Program RD-build and UD-build could be run at the same time.
  ```    
-	  Example:
-          ----------------------------
-	  perl UD-build.pl -i Your_data.bam -g Annotation.gff3 -o /your_dir/ -p 10
+Example:
+----------------------------
+perl UD-build.pl -i Your_data.bam -g Annotation.gff3 -o /your_dir/ -p 10
 
-	  or 
+or 
 
-	  perl UD-build.pl -i Your_data.fasta.gz -o /your_dir/ -p 10
+perl UD-build.pl -i Your_data.fasta.gz -o /your_dir/ -p 10
 
-    * Two user's sgRNA database files would be generated when the input file is Bam or Sam format. 
+* Two user's sgRNA database files would be generated when the input file is Bam or Sam format. 
 
-          Example of user's database files:
-          ----------------------------
-          ZmC01.gene.sgRNA.db.alignment.txt
+Example of user's database files:
+----------------------------
+ZmC01.gene.sgRNA.db.alignment.txt
+      
+Zm00001d022658  1:+4991138      5       0.2965  ATTCTGATTATATAGATATTAGG
+Zm00001d022658  1:+4991139      1       0.2965  ATTCTGATTATATAGATATTAGG
+Zm00001d022658  1:+4991231      4       0.5081  TGTTAGCCATGACATGTTTGAGG
+Zm00001d022658  1:+4991232      4       0.5198  GTTAGCCATGACATGTTTGAGGG
+Zm00001d022658  1:+4991233      4       0.6922  TTAGCCATGACATGTTTGAGGGG
+
+ZmC01.intergenic.sgRNA.db.alignment.txt
+
+Intergenic      1:+1024980      1       0.2012  CAGTCGTTGCCAAGCGTTCTTGG
+Intergenic      1:+1025011      2       0.4447  ACCAGCAAGCAGCGCACCACCGG
+Intergenic      1:+1025033      2       0.6557  GCAAGCAGCGCACCACCACAAGG
+Intergenic      1:+1025039      2       0.5222  AGCGCACCACCACAAGGTTGCGG
+Intergenic      1:+1025057      2       0.5021  TGCGGCTTCGAGCACTGCACCGG
+Intergenic      1:+1025080      1       0.5388  CAAGCAGCGCACCACCAGCAAGG
+Intergenic      1:+1025085      1       0.5927  AGCGCACCACCAGCAAGGAGTGG
+
+
+* There are 5 columns in the UD file and their meanings are listed below:
+
+Column 1:	The name of gene where the sgRNA located("Intergenic" means sgRNA locate in intergenic region).
+Column 2:	The chromosome and the coordinate of the start position of the sgRNA.
+Column 3:	The number of reads that contains this sgRNA.
+Column 4:	The on-target score of the sgRNA. 
+Column 5:	The sequence of sgRNA(23nt).
+
+* A user's sgRNA database file would be generated when the input file is fasta or fastq format. 
+
+Example of user's database files:
+----------------------------
+ZmC01.gene.sgRNA.db.fastq.txt 
+
+ZmC01_sgRNA        3       0.5809  ACAAACAGAGGTCTAAAGCAAGG
+ZmC01_sgRNA        5       0.4756  ACAAACAGCCGGTGAAGCTCCGG
+ZmC01_sgRNA        1       0.4811  ACAAACATTACCTTGTTGAGAGG
+ZmC01_sgRNA        1       0.5456  ACAAACCTGCTCTCAGGGGTGGG
+ZmC01_sgRNA        1       0.5662  ACAAACCTTTCTGTTCTGATGGG
+ZmC01_sgRNA        2       0.7371  ACAAACGCATGATACATAGGTGG
+ZmC01_sgRNA        16      0.4073  ACAAACGGCCGGCGGCAGCTAGG
+
+Column 1:	The ID of sgRNA.
+Column 2:	The number of reads that contains this sgRNA.
+Column 3:	The on-target score of the sgRNA. 
+Column 4:	The sequence of sgRNA(23nt).
+
+ZmC01.gene.sgRNA.db.fasta.txt
         
-          Zm00001d022658  1:+4991138      5       0.2965  ATTCTGATTATATAGATATTAGG
-          Zm00001d022658  1:+4991139      1       0.2965  ATTCTGATTATATAGATATTAGG
-          Zm00001d022658  1:+4991231      4       0.5081  TGTTAGCCATGACATGTTTGAGG
-          Zm00001d022658  1:+4991232      4       0.5198  GTTAGCCATGACATGTTTGAGGG
-          Zm00001d022658  1:+4991233      4       0.6922  TTAGCCATGACATGTTTGAGGGG
+chr1    +1124   0.1066  TAATCAAATAAATAAGTTTATGG
+chr1    +1279   0.3327  AGTAATACATTCTTATAAAATGG
+chr1    +1428   0.4202  GAGTCAGTGTCGTTATGTTATGG
+chr1    +1501   0.4973  TTACAAGGGAAGTCCCCAATTGG
+chr1    +1568   0.2559  AATCTTCTAATTACTGTATATGG
+chr1    +1620   0.3354  GTGGCCAAGGTTCCGTCATTTGG
+chr1    +1699   0.3337  ACATCTATCTCCATATGATATGG
 
-          ZmC01.intergenic.sgRNA.db.alignment.txt
-
-	Intergenic      1:+1024980      1       0.2012  CAGTCGTTGCCAAGCGTTCTTGG
-        Intergenic      1:+1025011      2       0.4447  ACCAGCAAGCAGCGCACCACCGG
-        Intergenic      1:+1025033      2       0.6557  GCAAGCAGCGCACCACCACAAGG
-        Intergenic      1:+1025039      2       0.5222  AGCGCACCACCACAAGGTTGCGG
-        Intergenic      1:+1025057      2       0.5021  TGCGGCTTCGAGCACTGCACCGG
-        Intergenic      1:+1025080      1       0.5388  CAAGCAGCGCACCACCAGCAAGG
-        Intergenic      1:+1025085      1       0.5927  AGCGCACCACCAGCAAGGAGTGG
-
-    * There are 5 columns in the UD file and their meanings are listed below:
-
-        Column 1:	The name of gene where the sgRNA located("Intergenic" means sgRNA locate in intergenic region).
-        Column 2:	The chromosome and the coordinate of the start position of the sgRNA.
-        Column 3:	The number of reads that contains this sgRNA.
-        Column 4:	The on-target score of the sgRNA. 
-        Column 5:	The sequence of sgRNA(23nt).
-
-    * A user's sgRNA database file would be generated when the input file is fasta or fastq format. 
-
-        Example of user's database files:
-        ----------------------------
-        ZmC01.gene.sgRNA.db.fastq.txt 
-
-        ZmC01_sgRNA        3       0.5809  ACAAACAGAGGTCTAAAGCAAGG
-        ZmC01_sgRNA        5       0.4756  ACAAACAGCCGGTGAAGCTCCGG
-        ZmC01_sgRNA        1       0.4811  ACAAACATTACCTTGTTGAGAGG
-        ZmC01_sgRNA        1       0.5456  ACAAACCTGCTCTCAGGGGTGGG
-        ZmC01_sgRNA        1       0.5662  ACAAACCTTTCTGTTCTGATGGG
-        ZmC01_sgRNA        2       0.7371  ACAAACGCATGATACATAGGTGG
-        ZmC01_sgRNA        16      0.4073  ACAAACGGCCGGCGGCAGCTAGG
-
-        Column 1:	The ID of sgRNA.
-        Column 2:	The number of reads that contains this sgRNA.
-        Column 3:	The on-target score of the sgRNA. 
-        Column 4:	The sequence of sgRNA(23nt).
-
-	ZmC01.gene.sgRNA.db.fasta.txt
-        
-	chr1    +1124   0.1066  TAATCAAATAAATAAGTTTATGG
-        chr1    +1279   0.3327  AGTAATACATTCTTATAAAATGG
-        chr1    +1368   0.3355  TAAATGAGATGTTGAATTAGAGG
-        chr1    +1428   0.4202  GAGTCAGTGTCGTTATGTTATGG
-        chr1    +1501   0.4973  TTACAAGGGAAGTCCCCAATTGG
-        chr1    +1568   0.2559  AATCTTCTAATTACTGTATATGG
-        chr1    +1620   0.3354  GTGGCCAAGGTTCCGTCATTTGG
-        chr1    +1699   0.3337  ACATCTATCTCCATATGATATGG
-
-        Column 1:	The ID of reads.
-        Column 2:	The coordinate of the start position of the sgRNA.
-        Column 3:	The on-target score of the sgRNA. 
-        Column 4:	The sequence of sgRNA(23nt).
+Column 1:	The ID of reads.
+Column 2:	The coordinate of the start position of the sgRNA.
+Column 3:	The on-target score of the sgRNA. 
+Column 4:	The sequence of sgRNA(23nt).
 ```
 #### (3) Program DB-search:
 
