@@ -1,4 +1,4 @@
-*.py linguist-language=Perl
-*.pyc linguist-language=Perl
-*.pkl linguist-language=Perl
-*.pickle linguist-language=Perl
+*.py linguist-language=perl
+*.pyc linguist-language=perl
+*.pkl linguist-language=perl
+*.pickle linguist-language=perl
