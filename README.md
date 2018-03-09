@@ -22,7 +22,7 @@ The following additional software and libraries are required: Seqmap (version: 1
 (2) The reference annotation file in GFF3 format can be downloaded from Ensembl Plants.
   
   * Example GFF3 file
-```r	
+```
 ##gff-version 3
 #!genome-build  Pmarinus_7.0
 #!genome-version Pmarinus_7.0
@@ -51,7 +51,7 @@ GL476399 ensembl CDS 2600895 2601044 . + 0 ID=CDS:ENSPMAP00000009982;Parent=tran
 * RD-build score all the sgRNAs by Rule set2 algorithm(John G Doench et al. 2016), then call the SeqMap(Jiang et al. 2008) program to identify how much potential off-target site does each sgRNA have, with maximum number of mismatches up to 4. 
 * CFD score(John G Doench et al. 2016) was used to predict sgRNA off-target effects of each sgRNA and its potential off-target site, keeping one result with highest CFD score of each sgRNA, then outputting the results to the reference sgRNA database (RD)
 * In addition, user can specify the number of bases to expanding 5'-end and 3'-end for each exon respectively.
-```r
+```
 Example:
 ----------------------------
 perl RD-build.pl -i Reference_Genome.fa -g Reference_annotation.gff3 -o /opt/your_dir/ -l Label -U 15 -D 3 -p 8
