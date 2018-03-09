@@ -90,6 +90,7 @@ Column 10:	The number that split by ":" means "TSS position", "exon start positi
 Column 11:	The highest CFD score between sgRNA and all off-target sites.
 ```
 ##### (ii) Cpf1
+* Cpf1 is a single RNA-guided endonuclease lacking tracrRNA, and it utilizes a T-rich PAM (5'-TTN or 5'-TTTN). Each mature crRNA begins with 19 nt of the direct repeat followed by 23–25 nt of the spacer sequence (Zetsche and Gootenberg et al.,2015);
 
 ####  (2) Program UD-build (if nessesary):
 
