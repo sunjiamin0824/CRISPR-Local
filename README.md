@@ -122,7 +122,7 @@ Column 2:	The chromosome and the coordinate of the start position of the sgRNA.
 Column 3:	The sequence of sgRNA.
 Column 4:	The on-target score of the sgRNA. (There is no available scoring method for Cpf1 sgRNA, denoted by NA)
 Column 5:	The nunber of off-target sites.
-olumn 6:	Type of match.(NM:no match found; U0:Best match found was a unique exact match; U1:Best match found was a unique 1-error match; U2:Best match found was a unique 2-error match... R0:Multiple exact matches found; R1:Multiple 1-error matches found, no exact matches; R2:Multiple 2-error matches found, no exact or 1-error matches.)
+Column 6:	Type of match.(NM:no match found; U0:Best match found was a unique exact match; U1:Best match found was a unique 1-error match; U2:Best match found was a unique 2-error match... R0:Multiple exact matches found; R1:Multiple 1-error matches found, no exact matches; R2:Multiple 2-error matches found, no exact or 1-error matches.)
 Column 7:	The number of exact, 1-error, 2-error, 3-error and 4-error matches found.
 Column 8:	The gene and position in which exact match was found. (If there is no exact match, then denoted by NA)
 Column 9:	The name of exon where the sgRNA located(split by ;).
