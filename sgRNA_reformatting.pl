@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-die  "Usage:perl $0 <GFF_index> <All_match_file> <Outfile>\n" unless (@ARGV ==3);
+die  "Usage:perl $0 <Designing_mode> <GFF_index> <All_match_file> <Outfile>\n" unless (@ARGV == 4);
 
-open (INDEX,"<$ARGV[0]") or die;
+open (INDEX,"<$ARGV[1]") or die;
 my %exon_list_gene;
 while (<INDEX>) {
 	chomp;
@@ -11,9 +11,9 @@ while (<INDEX>) {
 	$exon_list_gene{$exon}=$gene;
 }
 close INDEX;
-open (SEQMAP,"<$ARGV[1]") or die;
+open (SEQMAP,"<$ARGV[2]") or die;
 readline SEQMAP;
-open (OUTPUT,">$ARGV[2]") or die;
+open (OUTPUT,">$ARGV[3]") or die;
 my $sgRNA_score;my $sgRNA_pam;my $sgRNA_pos;my $sgRNA_info;
 my($OT_gene,$OT_pos,$OT_pam);
 my %sgRNA_POS;my %sgRNA;
@@ -21,30 +21,17 @@ while (<SEQMAP>) {
 	chomp;
 	my($OT_id,undef,$OT_seq,$sgRNA_id,$sgRNA_seq,$mismatch) = split("\t",$_); 
 	my $Exon = $sgRNA_id;
-	$Exon =~ s/_\[.+//;
+	$Exon =~ s/\#\[.+//;
 	if (exists $exon_list_gene{$Exon}) {
-		if ($OT_id =~ /_(.[AG]G)$/) {
-			$OT_pam = $1;
+		($OT_gene,$OT_pos,$OT_pam) = split ("\#",$OT_id);
+		($sgRNA_info,$sgRNA_pos,$sgRNA_pam,$sgRNA_score) = (split "\#",$sgRNA_id)[1,2,3,4];
+		if ($ARGV[0] eq "cpf1") {
+			$OT_seq = $OT_pam.$OT_seq;
+			$sgRNA_seq = $sgRNA_pam.$sgRNA_seq;
+		}else{
+			$OT_seq = $OT_seq.$OT_pam;
+			$sgRNA_seq = $sgRNA_seq.$sgRNA_pam;
 		}
-		if ($OT_id =~ /_(\w+:.\d+)_/) {
-			$OT_pos = $1;
-		}
-		$OT_gene = $OT_id;
-		$OT_gene =~s/_\w+:.+//;
-		if ($sgRNA_id =~ /_(0\.\d+)$/) {
-			$sgRNA_score = $1;
-		}
-		if ($sgRNA_id =~ /_(.GG)_/) {
-			$sgRNA_pam = $1;
-		}
-		if ($sgRNA_id =~ /_(\w+:.\d+)_/){
-			$sgRNA_pos = $1;
-		}
-		if ($sgRNA_id =~ /_(\[.+\])_/){
-			$sgRNA_info = $1;
-		}
-		$OT_seq = $OT_seq.$OT_pam;
-		$sgRNA_seq = $sgRNA_seq.$sgRNA_pam;
 		$sgRNA_POS{"$exon_list_gene{$Exon}:$sgRNA_pos"}{$Exon}=$sgRNA_info;
 		$sgRNA{"$exon_list_gene{$Exon}:$sgRNA_pos"}{$OT_pos}="$exon_list_gene{$Exon}\t$sgRNA_pos\t$sgRNA_seq\t$sgRNA_score\t$OT_gene\t$OT_pos\t$OT_seq\t$mismatch";
 	}
@@ -61,4 +48,4 @@ foreach my $key1 (sort keys %sgRNA_POS) {
 	}
 }
 close OUTPUT;
-system("rm $ARGV[1]");
+system("rm $ARGV[2]");
