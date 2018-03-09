@@ -98,8 +98,8 @@ Column 11:	The highest CFD score between sgRNA and all off-target sites.
 ```
 Example:
 ----------------------------
-perl RD-build.pl -m cpf1 -i Reference_Genome.fa -g Reference_annotation.gff3 -o /opt/your_dir/ -l Label -x 24 -t TTTV -p 8
-    
+perl RD-build.pl -m cas9 -i Reference_Genome.fa -g Reference_annotation.gff3 -o /opt/your_dir/ -l Label -U 15 -D 3 -p 8
+
 * This command will generate a reference database file and a log file.
 
 Example of reference database files:
@@ -123,11 +123,11 @@ Column 3:	The sequence of sgRNA.
 Column 4:	The on-target score of the sgRNA. (There is no available scoring method for Cpf1 sgRNA, denoted by NA)
 Column 5:	The nunber of off-target sites.
 olumn 6:	Type of match.(NM:no match found; U0:Best match found was a unique exact match; U1:Best match found was a unique 1-error match; U2:Best match found was a unique 2-error match... R0:Multiple exact matches found; R1:Multiple 1-error matches found, no exact matches; R2:Multiple 2-error matches found, no exact or 1-error matches.)
-Column 7:	The sequence of off-target site.
-Column 8:	The number of mismatches between sgRNA and off-target site.
+Column 7:	The number of exact, 1-error, 2-error, 3-error and 4-error matches found.
+Column 8:	The gene and position in which exact match was found. (If there is no exact match, then denoted by NA)
 Column 9:	The name of exon where the sgRNA located(split by ;).
 Column 10:	The number that split by ":" means "TSS position", "exon start position", "length of exon", "relative positon of sgRNA against exon" and "relative positon of sgRNA against TSS", respectively.
-Column 11:	The highest CFD score between sgRNA and all off-target sites.
+Column 11:	The highest off-target score between sgRNA and all off-target sites.(There is no available off-target scoring method for Cpf1 sgRNA, denoted by NA)
 ```
 ####  (2) Program UD-build (if nessesary):
 
@@ -136,14 +136,21 @@ Column 11:	The highest CFD score between sgRNA and all off-target sites.
 * Program UD-build supports input alignment file in Bam or Sam format, and raw reads file in fasta/fa/fasta.gz/fa.gz or fq/fastq/fq.gz/fastq.gz format.
 * If your file is Bam or Sam format, the annotation file in GFF3 format is needed to be specified.
 * Program RD-build and UD-build could be run at the same time.
+*(There is no available scoring method in Cpf1 and Custom mode, the score denoted by NA)
  ```    
 Example:
 ----------------------------
-perl UD-build.pl -i Your_data.bam -g Annotation.gff3 -o /your_dir/ -p 10
+For Cas9 mode:
 
-or 
+	perl UD-build.pl -m cas9 -i Your_data.bam -g Annotation.gff3 -o /your_dir/ -p 10
 
-perl UD-build.pl -i Your_data.fasta.gz -o /your_dir/ -p 10
+For Cpf1 mode:
+
+	perl UD-build.pl -m cpf1 -i Your_data.fasta -o /your_dir/ -p 10 -x 24 -t TTTV
+
+For Custom mode:
+
+	perl UD-build.pl -m custom -i Your_data.fastq -o /your_dir/ -l ZmB73 -t NRG -p 10 -x 20
 
 * Two user's sgRNA database files would be generated when the input file is Bam or Sam format. 
 
@@ -173,7 +180,7 @@ Intergenic      1:+1025085      1       0.5927  AGCGCACCACCAGCAAGGAGTGG
 Column 1:	The name of gene where the sgRNA located("Intergenic" means sgRNA locate in intergenic region).
 Column 2:	The chromosome and the coordinate of the start position of the sgRNA.
 Column 3:	The number of reads that contains this sgRNA.
-Column 4:	The on-target score of the sgRNA. 
+Column 4:	The on-target score of the sgRNA.
 Column 5:	The sequence of sgRNA(23nt).
 
 * A user's sgRNA database file would be generated when the input file is fasta or fastq format. 
@@ -218,13 +225,13 @@ Column 4:	The sequence of sgRNA(23nt).
 ```
      Example:
      ----------------------------
-     perl DB-search.pl -l ZmB73_query_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/ -N 3
+     perl DB-search.pl -g ZmB73_query_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/ -l label
 
      Output of this command
      Invalid_gene_RD.list	(Includes genes that do not exist in RD)
-     Gene_search_result_RD_only.txt	(The RD-specific sgRNAs)
-     Gene_search_result_UD_only.txt	(The UD-specific sgRNAs)
-     Gene_search_result_Co-sgRNA.txt	(The commom sgRNAs)
+     label_result_RO.txt	(The RD-specific sgRNAs)
+     label_result_UO.txt	(The UD-specific sgRNAs)
+     label_result_BO.txt	(The commom sgRNAs)
 
      Zm00001d001775  2:-547319       0.6568  0.0728  CGGGCGCATCATGCGCCGCGCGG
      Zm00001d001775  2:-547292       0.6551  0.0458  GGAGAACGGAAAGATCGCTAGGG
@@ -238,16 +245,23 @@ Column 4:	The sequence of sgRNA(23nt).
 #### (4) Program PL-search:
     
 * PL-search is a local tool for search exclusive and commom target for paralogous gene pair.
+* Example of paralog gene list:
+```
+Zm00001d049540,Zm00001d024543
+Zm00001d048890,Zm00001d029176
+Zm00001d031930,Zm00001d018487,Zm00001d003312
+Zm00001d036877,Zm00001d046535
+```
 ```     
       Example:
      ----------------------------
-      perl PL-search -l ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/
+      perl PL-search -g ZmB73_paralog_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/ -l label
       
       Output of this command
-      Paralog_search_result_common.txt
-      Paralog_search_result_exclusive.txt
+      label_common_targets.txt
+      label_exclusive_targets.txt
       
-      Paralog_search_result_common.txt
+      label_common_targets.txt
       
       GAAAATGTTGCCCATCGATATGG UD      Zm00001d031930:1:-207131656:0.428795    Zm00001d018487:5:-221689986:0.428795    Zm00001d003312:2:+39761372:0.428795
       AAGAAAGGGCTGCCCATTCTTGG UD      Zm00001d031930:1:-207131394:0.351515    Zm00001d018487:5:-221689268:0.351515    Zm00001d003312:2:+39761819:0.351515
@@ -260,7 +274,7 @@ Column 4:	The sequence of sgRNA(23nt).
       Column 2:	The sgRNAs exist in UD are indicated with "UD" mark.
       Column 3,4,5:	The gene ID; the coordinate o sgRNA; the on-target score of the sgRNA. 
       
-      Paralog_search_result_exclusive.txt
+      label_exclusive_targets.txt
       
       Zm00001d031930  1:-207131270    0.230513        TGGAGTGGATCCAGCTATTATGG Zm00001d028694  1:+43348332     TGTAGTTGATCCAGGTACTACAG 4       0.0016  RD      0
       Zm00001d031930  1:+207131844    0.139577        TTCCCAAGCAATGGAATTTATGG Zm00001d024478  10:-73139286    TTTACAAGCAGTGGAACTTAAGG 4       0.2656  UD      1
