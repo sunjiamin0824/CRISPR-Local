@@ -49,7 +49,7 @@ GL476399 ensembl CDS 2600895 2601044 . + 0 ID=CDS:ENSPMAP00000009982;Parent=tran
 ##### (i) Cas9 design mode:
 
 * In cas9 mode, this script: 
-	* (a) screening all possible on-target sgRNAs (with NGG PAM type) and scoring them with the Rule set 2 algorithm (Doench et al., 2016) for each exon,and screening all potential off-target sites (with NRG PAM type); 
+	* (a) Screening all possible on-target sgRNAs (with NGG PAM type) and scoring them with the Rule set 2 algorithm (Doench et al., 2016) for each exon,and screening all potential off-target sites (with NRG PAM type); 
 	* (b) Retrieving potential off-target sites against each candidate sgRNA by using SeqMap program (Jiang and Wong, 2008) under a default maximum mismatch of 4; 
 	* (c) Appling the cutting frequency determination (CFD) score (Doench et al., 2016) to predict the effects of each off-target site, the highest CFD score for each sgRNA is retained, and all the genome-wide results were exported as the RD.
 
@@ -58,7 +58,7 @@ GL476399 ensembl CDS 2600895 2601044 . + 0 ID=CDS:ENSPMAP00000009982;Parent=tran
 ```
 Example:
 ----------------------------
-perl RD-build.pl -i Reference_Genome.fa -g Reference_annotation.gff3 -o /opt/your_dir/ -l Label -U 15 -D 3 -p 8
+perl RD-build.pl -m cas9 -i Reference_Genome.fa -g Reference_annotation.gff3 -o /opt/your_dir/ -l Label -U 15 -D 3 -p 8
     
 * This command will generate a reference database file and a log file.
 
@@ -89,6 +89,8 @@ Column 9:	The name of exon where the sgRNA located(split by ;).
 Column 10:	The number that split by ":" means "TSS position", "exon start position", "length of exon", "relative positon of sgRNA against exon" and "relative positon of sgRNA against TSS", respectively.
 Column 11:	The highest CFD score between sgRNA and all off-target sites.
 ```
+##### (ii) Cpf1
+
 ####  (2) Program UD-build (if nessesary):
 
 * This script use to accept user's data to build user's sgRNA database.
