@@ -91,7 +91,44 @@ Column 11:	The highest CFD score between sgRNA and all off-target sites.
 ```
 ##### (ii) Cpf1
 * Cpf1 is a single RNA-guided endonuclease lacking tracrRNA, and it utilizes a T-rich PAM (5'-TTN or 5'-TTTN). Each mature crRNA begins with 19 nt of the direct repeat followed by 23–25 nt of the spacer sequence (Zetsche and Gootenberg et al.,2015);
+* In cpf1 mode, this script: 
+	* (a) Screening all possible on-target sgRNAs (with TTX or TTTX PAM type, X represents any base including A C G T R Y M K S W H B V D N),and screening all potential off-target sites (with TTX or TTTX PAM type). The type of PAM and length of protospacer are determined by user;
+	* (b) Retrieving potential off-target sites against each candidate sgRNA by using SeqMap program under a default maximum mismatch of 4; 
+	* (c) Summarizing the off-target results, and all the genome-wide results were exported as the RD.
+```
+Example:
+----------------------------
+perl RD-build.pl -m cpf1 -i Reference_Genome.fa -g Reference_annotation.gff3 -o /opt/your_dir/ -l Label -x 24 -t TTTV -p 8
+    
+* This command will generate a reference database file and a log file.
 
+Example of reference database files:
+----------------------------
+	
+TAIR10.reference.database.txt
+
+AT1G67220	1:-25147036	TTTCCTCGGTTTGAATCTTTCCTTTGTT	NA	5	U1	0,1,4,0,0	NA	AT1G67220.1.exon1;	[25145587:25145587:2181:731:731];	NA
+AT1G67220	1:-25147059	TTTCTTCTCATAGTTCAAAGACCTTTCC	NA	5	R1	0,2,3,0,0	NA	AT1G67220.1.exon1;	[25145587:25145587:2181:708:708];	NA
+AT1G67220	1:-25147095	TTTCATCGGCTCAACAATATCCACACCA	NA	8	R0	2,3,2,1,0	AT1G67220(1:-25146972);AT1G67220(1:-25147302);	AT1G67220.1.exon1;	[25145587:25145587:2181:672:672];	NA
+AT1G67220	1:-25147164	TTTCATTGGCTCAACAATAACCACATCA	NA	8	R3	0,0,0,7,1	NA	AT1G67220.1.exon1;	[25145587:25145587:2181:603:603];	NA
+AT1G67220	1:-25147173	TTTATTACATTTCATTGGCTCAACAATA	NA	0	NM	0,0,0,0,0	NA	AT1G67220.1.exon1;	[25145587:25145587:2181:594:594];	NA
+AT1G67220	1:-25147233	TTTCATTGGCTCAACAATATTCACACCA	NA	8	R2	0,0,3,4,1	NA	AT1G67220.1.exon1;	[25145587:25145587:2181:534:534];	NA
+AT1G67220	1:-25147302	TTTCATCGGCTCAACAATATCCACACCA	NA	8	R0	2,3,2,1,0	AT1G67220(1:-25146972);AT1G67220(1:-25147095);	AT1G67220.1.exon1;	[25145587:25145587:2181:465:465];	NA
+
+* There are 11 columns in the RD file and their meanings are listed below:
+
+Column 1:	The name of gene where the sgRNA located.
+Column 2:	The chromosome and the coordinate of the start position of the sgRNA.
+Column 3:	The sequence of sgRNA.
+Column 4:	The on-target score of the sgRNA. (There is no available scoring method for Cpf1 sgRNA, denoted by NA)
+Column 5:	The nunber of off-target sites.
+olumn 6:	Type of match.(NM:no match found; U0:Best match found was a unique exact match; U1:Best match found was a unique 1-error match; U2:Best match found was a unique 2-error match... R0:Multiple exact matches found; R1:Multiple 1-error matches found, no exact matches; R2:Multiple 2-error matches found, no exact or 1-error matches.)
+Column 7:	The sequence of off-target site.
+Column 8:	The number of mismatches between sgRNA and off-target site.
+Column 9:	The name of exon where the sgRNA located(split by ;).
+Column 10:	The number that split by ":" means "TSS position", "exon start position", "length of exon", "relative positon of sgRNA against exon" and "relative positon of sgRNA against TSS", respectively.
+Column 11:	The highest CFD score between sgRNA and all off-target sites.
+```
 ####  (2) Program UD-build (if nessesary):
 
 * This script use to accept user's data to build user's sgRNA database.
