@@ -42,7 +42,7 @@ if __name__ == '__main__':
 	else:
 		seq[name]=line.replace('\n','')
 		score = model_comparison.predict(seq[name], aa_cut, per_peptide, model=model)
-		o.write(name + '_%.6f'% (score) + '\n' + seq[name][4:24] + '\n')
+		o.write(name + '#%.6f'% (score) + '\n' + seq[name][4:24] + '\n')
     i.close()
     o.close()
     os.remove(input)
