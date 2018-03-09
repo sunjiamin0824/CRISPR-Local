@@ -1,5 +1,5 @@
-# CRISPR-Local
-
+CRISPR-Local
+============
 ## A local tool for high-throughput CRISPR single-guide RNA (sgRNA) design in plants.
 
 The following additional software and libraries are required: Seqmap (version: 1.0.12), Samtools (>1.3.1), Python (>2.7) with the scikit-learn (0.16.1), biopython, pandas, numpy, and scipy libraries, and Perl (>5.10) with the Parallel::ForkManager, File::Basename, Getopt::Long, Data::Dumper, Cwd modules. Most of the installation steps are fully automatic using a simple command line on a Linux system. 
