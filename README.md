@@ -46,11 +46,15 @@ GL476399 ensembl CDS 2600895 2601044 . + 0 ID=CDS:ENSPMAP00000009982;Parent=tran
 ### 2. How to run CRISPR-Local
 
 ####  (1) progam RD-build:
+##### (i) Cas9 design mode:
 
-* This script use to find all potential off-target sites from every gene sequence, with NGG and NAG PAM type(20mer(NGG/NAG)), and all possible sgRNAs with NGG PAM from every exon sequence(NNNN20merNGGNNN).
-* RD-build score all the sgRNAs by Rule set2 algorithm(John G Doench et al. 2016), then call the SeqMap(Jiang et al. 2008) program to identify how much potential off-target site does each sgRNA have, with maximum number of mismatches up to 4. 
-* CFD score(John G Doench et al. 2016) was used to predict sgRNA off-target effects of each sgRNA and its potential off-target site, keeping one result with highest CFD score of each sgRNA, then outputting the results to the reference sgRNA database (RD)
-* In addition, user can specify the number of bases to expanding 5'-end and 3'-end for each exon respectively.
+* In cas9 mode, this script: 
+	* (a) screening all possible on-target sgRNAs (with NGG PAM type) and scoring them with the Rule set 2 algorithm (Doench et al., 2016) for each exon,and screening all potential off-target sites (with NRG PAM type); 
+	* (b) Retrieving potential off-target sites against each candidate sgRNA by using SeqMap program (Jiang and Wong, 2008) under a default maximum mismatch of 4; 
+	* (c) Appling the cutting frequency determination (CFD) score (Doench et al., 2016) to predict the effects of each off-target site, the highest CFD score for each sgRNA is retained, and all the genome-wide results were exported as the RD.
+
+* In addition, the number of base pairs expanding 5'- and 3'-end of exon boundary can be assigned to indicate if the sgRNA can be accepted when they are partially overlapped with intron while the likely editing positions are still located in exon to knock out likewise.
+
 ```
 Example:
 ----------------------------
