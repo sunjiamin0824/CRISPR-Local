@@ -11,57 +11,48 @@ local $SIG{__WARN__} = sub {
 	die $message;
 };
 
-my ($List, $RefDB, $UserDB, $Path, $opt_help,);
+my ($List, $RefDB, $UserDB, $Path, $opt_help,$label);
 my $time = time();
 GetOptions(	
-			'l=s' => \$List,
+			'g=s' => \$List,
 			'i=s' => \$RefDB,
 			'u:s' => \$UserDB,
 			'o=s' => \$Path,
 			'h!'  => \$opt_help,		#Help message
+			'l:s' => \$label,
           );
 
 my $dir_default = getcwd;             #default output
 $Path ||= $dir_default;
 my $dir =$Path;
+$label ||= "PL-search";
 my $errmsg = "Use '$0 -h' for quick help; for more information, please see README.";
-
 my $helpmsg = qq{
 =============== CRISPR-Local ===============
 
 --- Usage ---
 e.g.,
-	perl $0 -l ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -o /your_dir/
+	perl $0 -g ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -o /your_dir/
 
 	or
 
-	perl $0 -l ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/
+	perl $0 -g ZmB73_paralogous_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/
 
 	
 --- Options ---
 
 	-h: show this help and exit
 
-	-l: <paralog_gene_list>
-	-i: <Reference_database>
-	-u: <User's database>
-	-o: <Output_path> (defualt: $dir_default)
-
+	-g <string>	:Paralog gene list
+	-i <string>	:Reference sgRNA database (RD)
+	-u <string>	:User's sgRNA database (UD)
+	-o <string>	:Output path (defualt: $dir_default)
+	-l <label>	:Name prefix for output file (default:PL_search)
 };
 err( $helpmsg ) if $opt_help;
 
-if (not ($List && $RefDB) ) {
-	print
-		"\n" .
-		"Please input the option, and press <Enter>.\n" .
-		"For quick help, input '-h' and press <Enter>.\n" .
-		"\n";
-	die "\n";
-}
-
 err( "ERROR - No paralog gene list file provided.\n$errmsg" ) if !$List;
 err( "ERROR - No reference database file provided.\n$errmsg" ) if !$RefDB;
-
 
 print "\n  Welcome to CRISPR-Local\n";
 print " Program PL_search: a local tool for search exclusive and commom target for paralogous gene pair.\n";
@@ -69,18 +60,17 @@ print "  ---------------------------------------------------------\n";
 print " Version   : 1.0"."\n";
 print " Copyright : Free software"."\n";
 print " Author    : Jiamin Sun"."\n";
-print " Email     : sunjiamin0824\@qq.com"."\n\n";
+print " Email     : sunjm0824\@webmail.hzau.edu.cn"."\n\n";
 
 my $local_time;
 $local_time = localtime();
 print "# Today : $local_time\n\n";
 print "# Program PL-search: a local tool for search exclusive and commom target for paralogous gene pair.\n";
-my $ran = int(rand(100000));
-print "\n# Your mission id is $ran.\n";
 
 print "# Reading paralog gene list file.\n";
 open (LIST,$List) or die "Can't open $List for reading!\n";
-my %gene_list;my %gene_pair;my(%RD_sgRNA,%RD_score,%RD_pos);
+
+my %gene_list;my %gene_pair;my(%RD_sgRNA,%RD_pos);
 
 while (<LIST>) {
 	chomp;
@@ -90,16 +80,14 @@ while (<LIST>) {
 	}
 	$gene_pair{$_} = undef;
 }
-
 print "# Reading reference database file.\n";
 open (SGRNA,$RefDB) or die $!;
 while (<SGRNA>) {
 	chomp;
-	my($gene,$pos,$seq,$score,$OT_gene,$OT_pos,$OT_seq,$mismatch,$CFD)=(split /\t/,$_)[0,1,2,3,4,5,6,7,-1];
+	my($gene,$pos,$seq,$score,$OT_1,$OT_2,$OT_3,$OT_4,$OT_score)=(split /\t/,$_)[0,1,2,3,4,5,6,7,-1];
 	if (exists $gene_list{$gene}) {
-		$RD_pos{"$gene:$seq"}="$pos:$score";
-		$RD_sgRNA{$gene}{$score}="$gene\t$pos\t$score\t$seq\t$OT_gene\t$OT_pos\t$OT_seq\t$mismatch\t$CFD";
-		$RD_score{$gene}{$seq}=$score;
+		$RD_pos{"$gene:$seq"}.="$gene:$pos:$score;";
+		$RD_sgRNA{$gene}{$seq}="$gene\t$pos\t$seq\t$score\t$OT_1\t$OT_2\t$OT_3\t$OT_4\t$OT_score";
 	}
 }
 close SGRNA;
@@ -107,28 +95,27 @@ close SGRNA;
 my %Inter_hash;
 foreach my $gene_pair (sort keys %gene_pair) {
 	my @pair = (split ",",$gene_pair);
-	my @inter_seq = keys %{$RD_score{$pair[0]}};
+	my @inter_seq = keys %{$RD_sgRNA{$pair[0]}};
 	for (my $i=0;$i<=$#pair;$i++) {
-		@inter_seq = grep {$RD_score{$pair[$i]}{$_}} @inter_seq;
+		@inter_seq = grep {$RD_sgRNA{$pair[$i]}{$_}} @inter_seq;
 	}
 	foreach my $inter (@inter_seq) {
 		$Inter_hash{$gene_pair}{$inter} = 1;
 		foreach my $paralog (@pair) {
-			delete $RD_score{$paralog}{$inter};
+			delete $RD_sgRNA{$paralog}{$inter};
 		}
 	}
 }
-
 if (!$UserDB) {
 	print "# Finding the commom targets...\n";
-	open (OUT,">$dir/Paralog_search_result_common_$ran.txt") or die "Can't open Paralog_search_result_common_$ran.txt for writing!\n";
+	open (OUT,">$dir/$label\_common_targets.txt") or die "Can't open $label\_common_targets.txt for writing!\n";
 	foreach my $gene_pair (sort keys %gene_pair) {
 		my @pair = (split ",",$gene_pair);
 		my @inter_seq = keys %{$Inter_hash{$gene_pair}};
 		foreach my $inter (@inter_seq) {
 			print OUT "$inter";
 			foreach my $paralog (@pair) {
-				print OUT "\t$paralog:".$RD_pos{"$paralog:$inter"};
+				print OUT "\t".$RD_pos{"$paralog:$inter"};
 			}
 			print OUT "\n";
 		}
@@ -136,18 +123,13 @@ if (!$UserDB) {
 	}
 	close OUT;
 	print "# Finding the exclusive targets...\n";
-	open (OUT,">$dir/Paralog_search_result_exclusive_$ran.txt") or die "Can't open Paralog_search_result_exclusive_$ran.txt for writing!\n";
+	open (OUT,">$dir/$label\_exclusive_targets.txt") or die "Can't open $label\_exclusive_targets.txt for writing!\n";
 	foreach my $gene_pair (sort keys %gene_pair) {
 		my @pair = (split ",",$gene_pair);
 		for (my $i=0;$i<=$#pair;$i++) {
-			my @RD_seq = sort keys %{$RD_score{$pair[$i]}};
-			my @score_RD;
-			foreach my $RD_seq (@RD_seq) {
-				push(@score_RD,$RD_score{$pair[$i]}{$RD_seq});
-			}
-			@score_RD = sort desc_sort_subject(@score_RD);
-			for (my $j=0;$j<=$#score_RD;$j++) {
-				print OUT "$RD_sgRNA{$pair[$i]}{$score_RD[$j]}\n";
+			my @RD_seq = sort keys %{$RD_sgRNA{$pair[$i]}};
+			for (my $j=0;$j<=$#RD_seq;$j++) {
+				print OUT "$RD_sgRNA{$pair[$i]}{$RD_seq[$j]}\n";
 			}
 		}
 	}
@@ -171,7 +153,7 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 	}
 	close UDB;
 	print "# Finding the commom targets...\n";
-	open (OUT,">$dir/Paralog_search_result_common_$ran.txt") or die "Can't open Paralog_search_result_common_$ran.txt for writing!\n";
+	open (OUT,">$dir/$label\_common_targets.txt") or die "Can't open $label\_common_targets.txt for writing!\n";
 	foreach my $gene_pair (sort keys %gene_pair) {
 		my @pair = (split ",",$gene_pair);
 		my @inter_seq = keys %{$Inter_hash{$gene_pair}};
@@ -187,7 +169,7 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 				print OUT "\tRD";
 			}
 			foreach my $paralog (@pair) {
-				print OUT "\t$paralog:".$RD_pos{"$paralog:$inter"};
+				print OUT "\t".$RD_pos{"$paralog:$inter"};
 			}
 			print OUT "\n";
 		}
@@ -196,23 +178,21 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 	close OUT;
 
 	print "# Finding the exclusive targets...\n";
-	open (OUT,">$dir/Paralog_search_result_exclusive_$ran.txt") or die "Can't open Paralog_search_result_exclusive_$ran.txt for writing!\n";
+	open (OUT,">$dir/$label\_exclusive_targets.txt") or die "Can't open $label\_exclusive_targets.txt for writing!\n";
 	foreach my $gene_pair (sort keys %gene_pair) {
 		my @pair = (split ",",$gene_pair);
 		for (my $i=0;$i<=$#pair;$i++) {
-			my @RD_seq = sort keys %{$RD_score{$pair[$i]}};
-			my @score_RD;my %UD;
+			my @RD_seq = sort keys %{$RD_sgRNA{$pair[$i]}};
+			my %UD;
 			foreach my $RD_seq (@RD_seq) {
-				push(@score_RD,$RD_score{$pair[$i]}{$RD_seq});
 				if (exists $UD_score{$pair[$i]}{$RD_seq}) {
-					$UD{$RD_score{$pair[$i]}{$RD_seq}} = "UD\t$UD_score{$pair[$i]}{$RD_seq}";
+					$UD{$pair[$i]}{$RD_seq} = "UD\t$UD_score{$pair[$i]}{$RD_seq}";
 				}else{
-					$UD{$RD_score{$pair[$i]}{$RD_seq}} = "RD\t0";
+					$UD{$pair[$i]}{$RD_seq} = "RD\t0";
 				}
 			}
-			@score_RD = sort desc_sort_subject(@score_RD);
-			for (my $j=0;$j<=$#score_RD;$j++) {
-				print OUT "$RD_sgRNA{$pair[$i]}{$score_RD[$j]}\t$UD{$score_RD[$j]}\n";
+			for (my $j=0;$j<=$#RD_seq;$j++) {
+				print OUT "$RD_sgRNA{$pair[$i]}{$RD_seq[$j]}\t$UD{$pair[$i]}{$RD_seq[$j]}\n";
 			}
 		}
 	}
@@ -227,7 +207,7 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 	}
 	close UDB;
 	print "# Finding the commom targets...\n";
-	open (OUT,">$dir/Paralog_search_result_common_$ran.txt") or die "Can't open Paralog_search_result_common_$ran.txt for writing!\n";
+	open (OUT,">$dir/$label\_common_targets.txt") or die "Can't open $label\_common_targets.txt for writing!\n";
 	foreach my $gene_pair (sort keys %gene_pair) {
 		my @pair = (split ",",$gene_pair);
 		my @inter_seq = keys %{$Inter_hash{$gene_pair}};
@@ -239,7 +219,7 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 				print OUT "\tRD";
 			}
 			foreach my $paralog (@pair) {
-				print OUT "\t$paralog:".$RD_pos{"$paralog:$inter"};
+				print OUT "\t".$RD_pos{"$paralog:$inter"};
 			}
 			print OUT "\n";
 		}
@@ -248,23 +228,21 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 	close OUT;
 
 	print "# Finding the exclusive targets...\n";
-	open (OUT,">$dir/Paralog_search_result_exclusive_$ran.txt") or die "Can't open Paralog_search_result_exclusive_$ran.txt for writing!\n";
+	open (OUT,">$dir/$label\_exclusive_targets.txt") or die "Can't open $label\_exclusive_targets.txt for writing!\n";
 	foreach my $gene_pair (sort keys %gene_pair) {
 		my @pair = (split ",",$gene_pair);
 		for (my $i=0;$i<=$#pair;$i++) {
-			my @RD_seq = sort keys %{$RD_score{$pair[$i]}};
-			my @score_RD;my %UD;
+			my @RD_seq = sort keys %{$RD_sgRNA{$pair[$i]}};
+			my %UD;
 			foreach my $RD_seq (@RD_seq) {
-				push(@score_RD,$RD_score{$pair[$i]}{$RD_seq});
-				if (exists $UD_score{$RD_seq}) {
-					$UD{$RD_score{$pair[$i]}{$RD_seq}} = "UD\t$UD_score{$RD_seq}";
+				if (exists $UD_score{$pair[$i]}{$RD_seq}) {
+					$UD{$pair[$i]}{$RD_seq} = "UD\t$UD_score{$pair[$i]}{$RD_seq}";
 				}else{
-					$UD{$RD_score{$pair[$i]}{$RD_seq}} = "RD\t0";
+					$UD{$pair[$i]}{$RD_seq} = "RD\t0";
 				}
 			}
-			@score_RD = sort desc_sort_subject(@score_RD);
-			for (my $j=0;$j<=$#score_RD;$j++) {
-				print OUT "$RD_sgRNA{$pair[$i]}{$score_RD[$j]}\t$UD{$score_RD[$j]}\n";
+			for (my $j=0;$j<=$#RD_seq;$j++) {
+				print OUT "$RD_sgRNA{$pair[$i]}{$RD_seq[$j]}\t$UD{$pair[$i]}{$RD_seq[$j]}\n";
 			}
 		}
 	}
@@ -274,12 +252,12 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 	open (UDB,$UserDB) or die;
 	while (<UDB>) {
 		chomp;
-		my($seq) = (split /\t/,$_)[-1];
+		my($num,$seq) = (split /\t/,$_)[-3,-1];
 		$UD_score{$seq}++;
 	}
 	close UDB;
 	print "# Finding the commom targets...\n";
-	open (OUT,">$dir/Paralog_search_result_common_$ran.txt") or die "Can't open Paralog_search_result_common_$ran.txt for writing!\n";
+	open (OUT,">$dir/$label\_common_targets.txt") or die "Can't open $label\_common_targets.txt for writing!\n";
 	foreach my $gene_pair (sort keys %gene_pair) {
 		my @pair = (split ",",$gene_pair);
 		my @inter_seq = keys %{$Inter_hash{$gene_pair}};
@@ -291,7 +269,7 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 				print OUT "\tRD";
 			}
 			foreach my $paralog (@pair) {
-				print OUT "\t$paralog:".$RD_pos{"$paralog:$inter"};
+				print OUT "\t".$RD_pos{"$paralog:$inter"};
 			}
 			print OUT "\n";
 		}
@@ -300,23 +278,21 @@ if ($UserDB =~ /gene.sgRNA.db.alignment.txt$/) {
 	close OUT;
 
 	print "# Finding the exclusive targets...\n";
-	open (OUT,">$dir/Paralog_search_result_exclusive_$ran.txt") or die "Can't open Paralog_search_result_exclusive_$ran.txt for writing!\n";
+	open (OUT,">$dir/$label\_exclusive_targets.txt") or die "Can't open $label\_exclusive_targets.txt for writing!\n";
 	foreach my $gene_pair (sort keys %gene_pair) {
 		my @pair = (split ",",$gene_pair);
 		for (my $i=0;$i<=$#pair;$i++) {
-			my @RD_seq = sort keys %{$RD_score{$pair[$i]}};
-			my @score_RD;my %UD;
+			my @RD_seq = sort keys %{$RD_sgRNA{$pair[$i]}};
+			my %UD;
 			foreach my $RD_seq (@RD_seq) {
-				push(@score_RD,$RD_score{$pair[$i]}{$RD_seq});
-				if (exists $UD_score{$RD_seq}) {
-					$UD{$RD_score{$pair[$i]}{$RD_seq}} = "UD\t$UD_score{$RD_seq}";
+				if (exists $UD_score{$pair[$i]}{$RD_seq}) {
+					$UD{$pair[$i]}{$RD_seq} = "UD\t$UD_score{$pair[$i]}{$RD_seq}";
 				}else{
-					$UD{$RD_score{$pair[$i]}{$RD_seq}} = "RD\t0";
+					$UD{$pair[$i]}{$RD_seq} = "RD\t0";
 				}
 			}
-			@score_RD = sort desc_sort_subject(@score_RD);
-			for (my $j=0;$j<=$#score_RD;$j++) {
-				print OUT "$RD_sgRNA{$pair[$i]}{$score_RD[$j]}\t$UD{$score_RD[$j]}\n";
+			for (my $j=0;$j<=$#RD_seq;$j++) {
+				print OUT "$RD_sgRNA{$pair[$i]}{$RD_seq[$j]}\t$UD{$pair[$i]}{$RD_seq[$j]}\n";
 			}
 		}
 	}
@@ -331,7 +307,4 @@ sub err {
 	my ( $msg ) = @_;
 	print "\n$msg\n\n";
 	die "\n";
-}
-sub desc_sort_subject {
-	$b <=> $a;
 }
