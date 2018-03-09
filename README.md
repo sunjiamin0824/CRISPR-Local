@@ -10,7 +10,7 @@ The following additional software and libraries are required: Seqmap (version: 1
 	*  Cpf1	:On-target: TTTN/TTN + 23/24/25 nt protospacer
 	*  Custom	:On-target: 15-25 nt protospacer + custom PAM sequence
 * In the plants for gene editing, the genome of the material and the reference genome are quite different. Leading to the fact that the sgRNA designed according to the reference genome is not well used in other materials.
-* User can summit their own sequence data in bam/sam/fasta/fastq format, then use program UD-build to make user's sgRNA database (UD).
+* UD-build could build another modified sgRNA database based on the additional sequencing data on non-reference lines, and be called as User’s sgRNA database (UD). Both aligned reads and unmapped reads are used to screen suitable sgRNA, the difference is that each aligned read can be assigned to one gene according to its alignment position. User can summit their own sequence data in bam/sam/fasta/fastq format.
 * Program DB-search would compare the RD with the UD, and output the RD-, UD-specific sgRNAs and commom sgRNAs, respectively. In general, the result of UD-specific sgRNAs and Common sgRNAs is better than RD-specific sgRNA.
 * PL-search mode keeps the function of DB-search mode that design targets in RD or both RD and UD. Moreover, PL-search would design targets for paralogs. In this mode, paralogous gene list is required, then users can design common targets or exclusive targets according to their needs.
 
