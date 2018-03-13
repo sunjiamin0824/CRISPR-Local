@@ -98,7 +98,7 @@ Column 11:	The highest CFD score between sgRNA and all off-target sites.
 ```
 Example:
 ----------------------------
-perl RD-build.pl -m cas9 -i Reference_Genome.fa -g Reference_annotation.gff3 -o /opt/your_dir/ -l Label -U 15 -D 3 -p 8
+perl RD-build.pl -m cpf1 -i Reference_Genome.fa -g Reference_annotation.gff3 -o /opt/your_dir/ -l Label -x 24 -t TTTV -p 8
 
 * This command will generate a reference database file and a log file.
 
@@ -233,12 +233,11 @@ Column 4:	The sequence of sgRNA(23nt).
      label_result_UO.txt	(The UD-specific sgRNAs)
      label_result_BO.txt	(The commom sgRNAs)
 
-     Zm00001d001775  2:-547319       0.6568  0.0728  CGGGCGCATCATGCGCCGCGCGG
-     Zm00001d001775  2:-547292       0.6551  0.0458  GGAGAACGGAAAGATCGCTAGGG
-     Zm00001d001775  2:+547304       0.6542  0.0543  TTCCGTTCTCCGTCACCGCGCGG
-     Zm00001d001792  2:+1029153      0.7932  0.0457  GCCGGAGTACTCGAGCAGCGCGG
-     Zm00001d001792  2:+1027126      0.7213  0.1346  GAAAGTGAGATACAAGCCAGTGG
-     Zm00001d001792  2:+1028960      0.7101  0.0478  CGGCAGGTGATGAGTCCTCGGGG
+     Zm00001d003312	2:-39761831	AACCTGAAAACACCAAGAATGGG	0.512525	Zm00001d023874	10:+25942379	AACCTGAAAAAAAAAAGAAACAG	4	0.0147
+     Zm00001d003312	2:+39761819	AAGAAAGGGCTGCCCATTCTTGG	0.351515	Zm00001d026321	10:+143570536	CAGAAAGGGCTGCTACTTCTCAG	4	0.0000
+     Zm00001d003312	2:-39761925	AAGCAGCGTTAAATGTAACAAGG	0.655492	Zm00001d025474	10:-119975899	AAGCAGCTTGAATTGTTACAGAG	4	0.0032
+     Zm00001d003312	2:-39761760	AGCACCATCACTCACTTGACTGG	0.468086	Zm00001d023838	10:+23893437	AGCCCTATCCCTCGCTTGACTAG	4	0.0132
+
      
     * User could select the sgRNA with high on-target score (column 3) and low off-target score (column 4).
 ```   
