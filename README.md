@@ -45,7 +45,7 @@ GL476399 ensembl CDS 2600895 2601044 . + 0 ID=CDS:ENSPMAP00000009982;Parent=tran
 	
 ### 2. How to run CRISPR-Local
 
-####  (1) progam RD-build:
+####  (1) program RD-build:
 ##### (i) Cas9 design mode:
 
 * In cas9 mode, this script: 
@@ -126,10 +126,10 @@ Column 6:	Type of match between sgRNA and off-target sites.(NM:no match found; U
 Column 7:	The number of exact, 1-error, 2-error, 3-error and 4-error matches found.
 Column 8:	The gene and position in which exact match was found. (If there is no exact match, then denoted by NA)
 Column 9:	The name of exon where the sgRNA located(split by ;).
-Column 10:	The number that split by ":" means "TSS position", "exon start position", "length of exon", "relative positon of sgRNA against exon" and "relative positon of sgRNA against TSS", respectively.
+Column 10:	The number that split by ":" means "TSS position", "exon start position", "length of exon", "relative position of sgRNA against exon" and "relative position of sgRNA against TSS", respectively.
 Column 11:	The highest off-target score between sgRNA and all off-target sites.(There is no available off-target scoring method for Cpf1 sgRNA, denoted by NA)
 ```
-####  (2) Program UD-build (if nessesary):
+####  (2) Program UD-build (if necessary):
 
 * This script use to accept user's data to build user's sgRNA database.
 * According to the contents and format of the data file, different methods was used to design sgRNAs and build database.
@@ -231,7 +231,7 @@ Column 4:	The sequence of sgRNA(23nt).
      Invalid_gene_RD.list	(Includes genes that do not exist in RD)
      label_result_RO.txt	(The RD-specific sgRNAs)
      label_result_UO.txt	(The UD-specific sgRNAs)
-     label_result_BO.txt	(The commom sgRNAs)
+     label_result_BO.txt	(The common sgRNAs)
 
      Zm00001d003312	2:-39761831	AACCTGAAAACACCAAGAATGGG	0.512525	Zm00001d023874	10:+25942379	AACCTGAAAAAAAAAAGAAACAG	4	0.0147
      Zm00001d003312	2:+39761819	AAGAAAGGGCTGCCCATTCTTGG	0.351515	Zm00001d026321	10:+143570536	CAGAAAGGGCTGCTACTTCTCAG	4	0.0000
@@ -243,7 +243,7 @@ Column 4:	The sequence of sgRNA(23nt).
 ```   
 #### (4) Program PL-search:
     
-* PL-search is a local tool for search exclusive and commom target for paralogous gene pair.
+* PL-search is a local tool for search exclusive and common target for paralogous gene pair.
 * Example of paralog gene list:
 ```
 Zm00001d049540,Zm00001d024543
