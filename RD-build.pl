@@ -90,7 +90,7 @@ For Custom mode:
 err( $helpmsg ) if $opt_help;
 
 $opt_mode = lc $opt_mode;
-err( "ERROR - Unknown mode: -m $opt_mode (supported mode: Cas9, Cpf1, Custom).\n$errmsg" ) unless grep /^$opt_mode$/, qw( cas9 cpf1 Custom );
+err( "ERROR - Unknown mode: -m $opt_mode (supported mode: Cas9, Cpf1, Custom).\n$errmsg" ) unless grep /^$opt_mode$/, qw( cas9 cpf1 custom );
 
 if ( not ($GFF3 && $Genome) ) {
 	print
