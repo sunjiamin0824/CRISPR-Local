@@ -192,7 +192,8 @@ while (<FASTA>) {
 		$i =~ s/(>|chr)//ig;
 		$chrom{$i}=undef;
 	}else{
-		$chrom{$i}.=$_;
+		my $line = uc $_;
+		$chrom{$i}.=$line;
 	}
 }
 close FASTA;
