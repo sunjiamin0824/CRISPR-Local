@@ -457,11 +457,15 @@ if ($opt_mode eq "cas9") {
 	for (my $j=1; $j<=$file_num; $j++) {
 		$pm->start and next;
 		if (-e "$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.fasta") {
-			my $line = `wc -l $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.fasta`;
-			if ($line) {
-				$line =$& if ($line =~ /^(\d+)/);
+			my $line1 = `wc -l $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.fasta`;
+			my $line2 = `wc -l $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.fasta`;
+			if ($line1) {
+				$line1 =$& if ($line1 =~ /^(\d+)/);
 			}
-			if ($line == 100000) {
+			if ($line2) {
+				$line2 =$& if ($line2 =~ /^(\d+)/);
+			}
+			if ($line1 == $line2) {
 				system("rm $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.fasta");
 				$pm->finish;
 				next;
