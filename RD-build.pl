@@ -210,7 +210,26 @@ if ($opt_mode eq "cas9") {
 	print  LOG "# Step2: Reading GFF3 file.\n";
 	print  "# Step2: Reading GFF3 file.\n";
 	open (GFF3,">$dir/$label.tmp.sorted.gff3") or die "Can't open $label.temp.sorted.gff3 for writing!\n";
-	my @feature = qw/gene RNA transcript exon CDS/;
+	open (GFF,$GFF3) or die "Can't open $GFF3 for reading!\n";
+	while (<GFF>) {
+		next if ($_=~/^(\#|\n)/);
+		my @line = (split /\t/,$_);
+		if ($line[2] =~/gene$/) {
+			my$ID="";
+			if ($line[8] =~ /((NAME|ID)\=\S+?)(\n|;)/i) {
+				$ID = $1;
+				$ID =~ s/(NAME|id)\=//i;
+				$ID =~ s/gene://i;
+			}else{
+				next;
+			}
+			$line[8] = "$ID;\n";
+			my $des = join("\t",@line[0..8]);
+			print GFF3 "$des";
+		}
+	}
+	close GFF;
+	my @feature = qw/RNA transcript exon CDS/;
 	foreach my $key (@feature) {
 		open (GFF,$GFF3) or die "Can't open $GFF3 for reading!\n";
 		while (<GFF>) {
@@ -222,11 +241,15 @@ if ($opt_mode eq "cas9") {
 					$parent = $1;
 					$parent =~ s/PARENT\=//i;
 					$parent =~ s/(gene|transcript)://i;
+				}else{
+					next;
 				}
 				if ($line[8] =~ /((NAME|ID)\=\S+?)(\n|;)/i) {
 					$ID = $1;
 					$ID =~ s/(NAME|id)\=//i;
-					$ID =~ s/(gene|transcript|exon|CDS)://i;
+					$ID =~ s/(transcript|exon|CDS)://i;
+				}else{
+					next;
 				}
 				$line[8] = "$ID;$parent\n";
 				my $des = join("\t",@line[0..8]);
@@ -435,7 +458,9 @@ if ($opt_mode eq "cas9") {
 		$pm->start and next;
 		if (-e "$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.fasta") {
 			my $line = `wc -l $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.fasta`;
-			$line =$& if ($line =~ /^(\d+)/);
+			if ($line) {
+				$line =$& if ($line =~ /^(\d+)/);
+			}
 			if ($line == 100000) {
 				system("rm $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.fasta");
 				$pm->finish;
