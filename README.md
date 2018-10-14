@@ -10,15 +10,15 @@ The following additional software and libraries are required: Seqmap (version: 1
 	*  Cpf1	:On-target: TTTN/TTN + 23/24/25 nt protospacer
 	*  Custom	:On-target: 15-25 nt protospacer + custom PAM sequence
 * In the plants for gene editing, the genome of the material and the reference genome are quite different. Leading to the fact that the sgRNA designed according to the reference genome is not well used in other materials.
-* UD-build could build another modified sgRNA database based on the additional sequencing data on non-reference lines, and be called as User’s sgRNA database (UD). Both aligned reads and unmapped reads are used to screen suitable sgRNA, the difference is that each aligned read can be assigned to one gene according to its alignment position. User can summit their own sequence data in bam/sam/fasta/fastq format.
+* UD-build could build another modified sgRNA database based on the additional sequencing data on non-reference lines, and be called as User¡¯s sgRNA database (UD). Both aligned reads and unmapped reads are used to screen suitable sgRNA, the difference is that each aligned read can be assigned to one gene according to its alignment position. User can summit their own sequence data in bam/sam/fasta/fastq format.
 * Program DB-search would compare the RD with the UD, and the results consist of three parts: The sgRNAs present exclusively in RD (RD only, RO) or UD (UD only, UO), or both (BO). Generally, the sgRNAs from BO is preferential, and cautions should be required for UO, and RO is strongly not recommended especially when the supplied NGS data is adequate enough. 
 * PL-search is typically designed for editing multiple paralogs to address redundancy concerns,like knocking out multiple key genes for several pathways determining one phenotype. This step follows the function of above DB-search mode that distinguish targets to RO, UO or BO. Moreover, PL-search will additionally partition the targets to common (suits to all candidates) and exclusive (individually matched) according to any submitted list of genes.
 
 ### 1.Prepare CRISPR-Local input (fasta/genome) files
 
 (1) Reference genome fasta file, can be downloaded from Ensembl Plants or NCBI or other source.
-  * Before perform CRISPR-Local program, multiple fasta files need be combined into one big fasta file by using cat command.
-  * In order for this step to work correctly, the chromosome names (sequence headers) in the FASTA reference genome file must be the same as the first column of GFF3 annotation file.
+  * Before performing CRISPR-Local program, multiple fasta files need be combined into one big fasta file by using cat command.
+  * For this step to work correctly, the chromosome names (sequence headers) in the FASTA reference genome file must be the same as the first column of GFF3 annotation file.
 (2) The reference annotation file in GFF3 format can be downloaded from Ensembl Plants.
   
   * Example GFF3 file
@@ -46,6 +46,39 @@ GL476399 ensembl CDS 2600895 2601044 . + 0 ID=CDS:ENSPMAP00000009982;Parent=tran
 ### 2. How to run CRISPR-Local
 
 ####  (1) program RD-build:
+```
+* Parameters
+--- Required ---
+	
+	-m <string>	:The sgRNA designing mode: Cas9, Cpf1 and Custom (default: Cas9)
+
+	  Cas9		:On-target: 20 nt protospacer + NGG, off-target: 20 nt + NRG
+	  Cpf1		:On-target: TTTN/TTN + 23/24/25 nt protospacer
+	  Custom	:On-target: 15-25 nt protospacer + custom PAM sequence
+
+	-i <string>	:reference genome sequence file
+	-g <string>	:reference genome annotation file
+
+--- Options ---
+
+	-o <string>	:Output path (default: current directory)
+	-l <string>	:Name prefix for output file (default: CRISPR)
+	-p <int>	:The number of process to use (default:1)
+
+	If Cas9 mode:
+
+	 -U <int>	:An integer specifying the number of base pairs expanding 5'-end of exon boundary (default: 0, >15 is not allowed)
+	 -D <int>	:An integer specifying the number of base pairs expanding 3'-end of exon boundary (default: 0, >3 is not allowed)
+
+	Or, if Cpf1 and Custom mode:
+
+	  -x <int>	:Cpf1: Length of spacer: between 23 to 25 (default: 24 nt);
+			:Custom: Length of spacer: between 15 to 25 (default: 20 nt);
+	  -t <string>	:Cpf1: Type of PAM sequence: TTX or TTTX (X: One of A C G T R Y M K S W H B V D N; default: TTTN)
+			:Custom: Type of PAM sequence (default: NGG)
+
+	-h: show this help
+```
 ##### (i) Cas9 design mode:
 
 * In cas9 mode, this script: 
@@ -86,11 +119,11 @@ Column 6:	The chromosome and the coordinate of the start position of the off-tar
 Column 7:	The sequence of off-target site.
 Column 8:	The number of mismatches between sgRNA and off-target site.
 Column 9:	The name of exon where the sgRNA located(split by ;).
-Column 10:	The number that split by ":" means "TSS position", "exon start position", "length of exon", "relative positon of sgRNA against exon" and "relative positon of sgRNA against TSS", respectively.
+Column 10:	The number that split by ":" means "TSS position", "exon start position", "length of exon", "relative position of sgRNA against exon" and "relative position of sgRNA against TSS", respectively.
 Column 11:	The highest CFD score between sgRNA and all off-target sites.
 ```
 ##### (ii) Cpf1
-* Cpf1 is a single RNA-guided endonuclease lacking tracrRNA, and it utilizes a T-rich PAM (5'-TTN or 5'-TTTN). Each mature crRNA begins with 19 nt of the direct repeat followed by 23–25 nt of the spacer sequence (Zetsche and Gootenberg et al.,2015);
+* Cpf1 is a single RNA-guided endonuclease lacking tracrRNA, and it utilizes a T-rich PAM (5'-TTN or 5'-TTTN). Each mature crRNA begins with 19 nt of the direct repeat followed by 23¨C25 nt of the spacer sequence (Zetsche and Gootenberg et al.,2015);
 * In cpf1 mode, this script: 
 	* (a) Screening all possible on-target sgRNAs (with TTX or TTTX PAM type, X represents any base including A C G T R Y M K S W H B V D N),and screening all potential off-target sites (with TTX or TTTX PAM type). The type of PAM and length of protospacer are determined by user;
 	* (b) Retrieving potential off-target sites against each candidate sgRNA by using SeqMap program under a default maximum mismatch of 4; 
@@ -121,7 +154,7 @@ Column 1:	The name of gene where the sgRNA located.
 Column 2:	The chromosome and the coordinate of the start position of the sgRNA.
 Column 3:	The sequence of sgRNA.
 Column 4:	The on-target score of the sgRNA. (There is no available scoring method for Cpf1 sgRNA, denoted by NA)
-Column 5:	The nunber of off-target sites.
+Column 5:	The number of off-target sites.
 Column 6:	Type of match between sgRNA and off-target sites.(NM:no match found; U0:Best match found was a unique exact match; U1:Best match found was a unique 1-error match; U2:Best match found was a unique 2-error match... R0:Multiple exact matches found; R1:Multiple 1-error matches found, no exact matches; R2:Multiple 2-error matches found, no exact or 1-error matches.)
 Column 7:	The number of exact, 1-error, 2-error, 3-error and 4-error matches found.
 Column 8:	The gene and position in which exact match was found. (If there is no exact match, then denoted by NA)
@@ -132,13 +165,39 @@ Column 11:	The highest off-target score between sgRNA and all off-target sites.(
 ####  (2) Program UD-build (if necessary):
 
 * This script use to accept user's data to build user's sgRNA database.
-* According to the contents and format of the data file, different methods was used to design sgRNAs and build database.
+* According to the contents and format of the data file, different methods were used to design sgRNAs and build database.
 * Program UD-build supports input alignment file in Bam or Sam format, and raw reads file in fasta/fa/fasta.gz/fa.gz or fq/fastq/fq.gz/fastq.gz format.
 * If your file is Bam or Sam format, the annotation file in GFF3 format is needed to be specified.
 * Program RD-build and UD-build could be run at the same time.
 *(There is no available scoring method in Cpf1 and Custom mode, the score denoted by NA)
  ```    
-Example:
+* Parameters
+--- Required ---
+
+	-m <string>	:The sgRNA designing mode: Cas9, Cpf1 and Custom (default: Cas9)
+
+	  Cas9		:On-target: 20 nt protospacer + NGG, off-target: 20 nt + NRG
+	  Cpf1		:On-target: TTTN/TTN + 23/24/25 nt protospacer
+	  Custom	:On-target: 15-25 nt protospacer + custom PAM sequence
+
+	-i <string>	:User's sequence file (In bam, fastq or fasta format)
+	-g <string>	:Genome annotation file (This parameter is required only if the format of sequence file is bam)
+
+--- Options ---
+
+	-o <string>	:Output path (defualt: current directory)
+	-p <int>	:The number of process to use (default:1)
+
+	-h: show this help
+	
+	If Cpf1 and Custom mode:
+
+	  -x <int>	:Cpf1: Length of spacer: between 23 to 25 (default: 24 nt);
+			:Custom: Length of spacer: between 15 to 25 (default: 20 nt);
+	  -t <string>	:Cpf1: Type of PAM sequence: TTX or TTTX (X: One of A C G T R Y M K S W H B V D N; default: TTTN)
+			:Custom: Type of PAM sequence (default: NGG)
+
+* Example:
 ----------------------------
 For Cas9 mode:
 
@@ -150,7 +209,7 @@ For Cpf1 mode:
 
 For Custom mode:
 
-	perl UD-build.pl -m custom -i Your_data.fastq -o /your_dir/ -l ZmB73 -t NRG -p 10 -x 20
+	perl UD-build.pl -m custom -i Your_data.fastq -o /your_dir/ -t NRG -p 10 -x 20
 
 * Two user's sgRNA database files would be generated when the input file is Bam or Sam format. 
 
@@ -223,7 +282,21 @@ Column 4:	The sequence of sgRNA(23nt).
 * If you did not run the program UD-build, you can specify only the RD.
 * DB-search select the important columns in the database file, sorted by score, and finally output the result.
 ```
-     Example:
+* Parameters
+--- Required ---
+
+	-g <string>	:Query gene list file
+	-i <string>	:Reference sgRNA database (RD)
+
+--- Optional ---
+
+	-u <string>	:User's sgRNA database (UD)
+	-o <string>	:Output path (defualt: current directory)
+	-l <label>	:Name prefix for output file (default:DB_search)
+
+	-h		:show this help
+
+* Example:
      ----------------------------
      perl DB-search.pl -g ZmB73_query_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/ -l label
 
@@ -233,11 +306,12 @@ Column 4:	The sequence of sgRNA(23nt).
      label_result_UO.txt	(The UD-specific sgRNAs)
      label_result_BO.txt	(The common sgRNAs)
 
-     Zm00001d003312	2:-39761831	AACCTGAAAACACCAAGAATGGG	0.512525	Zm00001d023874	10:+25942379	AACCTGAAAAAAAAAAGAAACAG	4	0.0147
-     Zm00001d003312	2:+39761819	AAGAAAGGGCTGCCCATTCTTGG	0.351515	Zm00001d026321	10:+143570536	CAGAAAGGGCTGCTACTTCTCAG	4	0.0000
-     Zm00001d003312	2:-39761925	AAGCAGCGTTAAATGTAACAAGG	0.655492	Zm00001d025474	10:-119975899	AAGCAGCTTGAATTGTTACAGAG	4	0.0032
-     Zm00001d003312	2:-39761760	AGCACCATCACTCACTTGACTGG	0.468086	Zm00001d023838	10:+23893437	AGCCCTATCCCTCGCTTGACTAG	4	0.0132
-
+     Zm00001d001775  2:-547319       0.6568  0.0728  CGGGCGCATCATGCGCCGCGCGG
+     Zm00001d001775  2:-547292       0.6551  0.0458  GGAGAACGGAAAGATCGCTAGGG
+     Zm00001d001775  2:+547304       0.6542  0.0543  TTCCGTTCTCCGTCACCGCGCGG
+     Zm00001d001792  2:+1029153      0.7932  0.0457  GCCGGAGTACTCGAGCAGCGCGG
+     Zm00001d001792  2:+1027126      0.7213  0.1346  GAAAGTGAGATACAAGCCAGTGG
+     Zm00001d001792  2:+1028960      0.7101  0.0478  CGGCAGGTGATGAGTCCTCGGGG
      
     * User could select the sgRNA with high on-target score (column 3) and low off-target score (column 4).
 ```   
@@ -252,7 +326,21 @@ Zm00001d031930,Zm00001d018487,Zm00001d003312
 Zm00001d036877,Zm00001d046535
 ```
 ```     
-      Example:
+* Parameters
+--- Required ---
+
+	-g <string>	:Paralog gene list
+	-i <string>	:Reference sgRNA database (RD)
+
+--- Optional ---
+
+	-u <string>	:User's sgRNA database (UD)
+	-o <string>	:Output path (defualt: $dir_default)
+	-l <label>	:Name prefix for output file (default:PL_search)
+
+	-h: show this help and exit
+
+* Example:
      ----------------------------
       perl PL-search -g ZmB73_paralog_gene.list -i ZmB73.reference.database.txt -u ZmC01.gene.sgRNA.db.alignment.txt -o /your_dir/ -l label
       
