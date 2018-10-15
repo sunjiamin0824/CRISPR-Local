@@ -68,7 +68,7 @@ For Custom mode:
 
 --- Options ---
 
-	-o <string>	:Output path (defualt: $dir_default)
+	-o <string>	:Output path (default: $dir_default)
 	-l <string>	:Name prefix for output file (default: CRISPR)
 	-p <int>	:The number of process to use (default:1)
 
@@ -320,8 +320,8 @@ if ($opt_mode eq "cas9") {
 	
 	################################### Extract POT sites ###################################
 	
-	print LOG  "# Step3: Extracting potential off-target sites.(30nt)\n";
-	print  "# Step3: Extracting potential off-target sites.(30nt)\n";
+	print LOG  "# Step3: Extracting potential off-target sites.\n";
+	print  "# Step3: Extracting potential off-target sites.\n";
 	
 	my ($p, $OTseq, $pam, $pos);
 	open (OUT,">$dir/$label.Potential.off.target/$label.POT.fasta") or die "Can't open $label.POT.fasta for writing!\n";
@@ -380,7 +380,7 @@ if ($opt_mode eq "cas9") {
 						}
 					
 						print OUT1 "$string\#$exon_CHR{$attr1s}:+"."$absolute_pos\#$PAM\n$EXread\n";
-						if ($read_cnt>=100000) {
+						if ($read_cnt>=50000) {
 							$read_cnt=0;
 							close OUT1;
 							$P++;
@@ -568,8 +568,25 @@ if ($opt_mode eq "cas9") {
 	unlink("$dir/$label.Seqmap.result/$label.CFD.txt") or die "Can't delete $label.CFD.txt file";
 	
 	system("mkdir -p -m 755 $dir/$label.sgRNA.database");
-	system("sort -t\$'\t' -k1,1 -k4nr,4 $dir/$label.Seqmap.result/$label.filt.result.txt > $dir/$label.sgRNA.database/$label.reference.database.txt");
+	system("sort -t\$'\t' -k1,1 -k4nr,4 $dir/$label.Seqmap.result/$label.filt.result.txt > $dir/$label.sgRNA.database/$label.reference.database.tmp");
 	unlink("$dir/$label.Seqmap.result/$label.filt.result.txt") or die "Can't delete $label.filt.result.txt file";
+	open (TMP, "$dir/$label.sgRNA.database/$label.reference.database.tmp") or die;
+	open (RD, ">$dir/$label.sgRNA.database/$label.reference.database.txt") or die;
+	while (<TMP>){
+		chomp;
+		my @TMP = (split /\t/,$_);
+		my $tmp_guide = substr($TMP[2],0,20);
+		my $tmp_pam = substr($TMP[2],20,3);
+		my $tmp_ot_guide = substr($TMP[6],0,20);
+		my $tmp_ot_pam = substr($TMP[6],20,3);
+		$TMP[2] = $tmp_guide."+".$tmp_pam;
+		$TMP[6] = $tmp_ot_guide."+".$tmp_ot_pam;
+		my $TMP_line = join("\t",@TMP[0..10]);
+		print RD "$TMP_line\n";
+	}
+	close TMP;
+	close RD;
+	unlink("$dir/$label.sgRNA.database/$label.reference.database.tmp") or die "$dir/$label.sgRNA.database/$label.reference.database.tmp";
 }elsif ($opt_mode eq "cpf1") {
 	################################### Reading GFF3 ###################################
 
@@ -659,7 +676,7 @@ if ($opt_mode eq "cas9") {
 				my $exon_start = $start;
 				my $exon_end = $end;
 				$trans_exon{$attr[1]}{$exon_name} = "";
-				my $exon_seq = substr($chrom{$chr}, $exon_start-1, int(($exon_end-$exon_start+1)));
+				my $exon_seq = substr($chrom{$chr}, $exon_start-1-4, int(($exon_end-$exon_start+1+4+4)));
 				my $exon_seq_rev = $exon_seq;
 				$exon_CHR{$exon_name} = $chr;
 				$exon_START{$exon_name} = int($exon_start);
@@ -690,8 +707,8 @@ if ($opt_mode eq "cas9") {
 	
 	################################### Extract POT sites ###################################
 	
-	print LOG  "# Step3: Extracting potential off-target sites.(30nt)\n";
-	print  "# Step3: Extracting potential off-target sites.(30nt)\n";
+	print LOG  "# Step3: Extracting potential off-target sites.\n";
+	print  "# Step3: Extracting potential off-target sites.\n";
 	
 	my ($p, $OTseq, $pam, $pos);
 	open (OUT,">$dir/$label.Potential.off.target/$label.POT.fasta") or die "Can't open $label.POT.fasta for writing!\n";
@@ -729,15 +746,16 @@ if ($opt_mode eq "cas9") {
 	my $P=1;my $read_cnt=0;
 	my ($relative_pos, $absolute_pos);
 	my ($reads, $PAM, $string, $EXread, $score, $attr1s);
-	open (OUT1,">$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$P.fasta") or die "Can't open $label.Possible.sgRNA.$P.fasta for writing!\n";
+	open (OUT1,">$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$P.txt") or die "Can't open $label.Possible.sgRNA.$P.txt for writing!\n";
+	print OUT1 "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
 	foreach my $transcript (sort keys %trans_exon) {
 		foreach $attr1s (sort keys %{$trans_exon{$transcript}}) {
 			if (exists $exon_picked{$attr1s}) {
-				while ($exon_picked{$attr1s}=~/(?=($PAM_type\w{$spacer}))/g) {
-					$reads = substr($1,$PAM_len,$spacer);
-					$PAM = substr($1,0,$PAM_len);
+				while ($exon_picked{$attr1s}=~/(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+					$reads = substr($1,$PAM_len+4,$spacer);
+					$PAM = substr($1,4,$PAM_len);
 					$EXread = $1;
-					$pos = pos($exon_picked{$attr1s});
+					$pos = pos($exon_picked{$attr1s}) + 4 - 4;
 					unless ($EXread=~/[^AGCT]/ or $reads=~/T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
 						$read_cnt++;
 						$string = ">$attr1s";
@@ -749,18 +767,19 @@ if ($opt_mode eq "cas9") {
 							$string = "$string\#[$exon_START{$attr1s}:$exon_length{$attr1s}:$pos]";
 						}
 					
-						print OUT1 "$string\#$exon_CHR{$attr1s}:+$absolute_pos\#$PAM\#NA\n$reads\n";
-						if ($read_cnt>=100000) {
+						print OUT1 "$string\#$exon_CHR{$attr1s}:+$absolute_pos\#$PAM\t$EXread\t1\n";
+						if ($read_cnt>=50000) {
 							$read_cnt=0;
 							close OUT1;
 							$P++;
-							open (OUT1,">$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$P.fasta") or die"Can't open $label.Possible.sgRNA.$P.fasta for writing!\n";
+							open (OUT1,">$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$P.txt") or die"Can't open $label.Possible.sgRNA.$P.txt for writing!\n";
+								print OUT1 "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
 						}
 					}
 				}
-				while ($exon_picked_rev{$attr1s}=~/(?=($PAM_type\w{$spacer}))/g) {
-					$reads = substr($1,$PAM_len,$spacer);
-					$PAM = substr($1,0,$PAM_len);
+				while ($exon_picked_rev{$attr1s}=~/(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+					$reads = substr($1,$PAM_len+4,$spacer);
+					$PAM = substr($1,4,$PAM_len);
 					$EXread = $1;
 					$pos = pos($exon_picked_rev{$attr1s}) + $spacer + $PAM_len - 1;
 					unless ($EXread=~/[^AGCT]/ or $reads=~/T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
@@ -774,12 +793,13 @@ if ($opt_mode eq "cas9") {
 							$string = "$string\#[$exon_START{$attr1s}:$exon_length{$attr1s}:$pos]";
 						}
 						
-						print OUT1 "$string\#$exon_CHR{$attr1s}:-$absolute_pos\#$PAM\#NA\n$reads\n";
+						print OUT1 "$string\#$exon_CHR{$attr1s}:-$absolute_pos\#$PAM\t$EXread\t1\n";
 						if ($read_cnt>=50000) {
 							$read_cnt=0;
 							close OUT1;
 							$P++;
-							open (OUT1,">$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$P.fasta") or die"Can't open $label.Possible.sgRNA.$P.fasta for writing!\n";
+							open (OUT1,">$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$P.txt") or die"Can't open $label.Possible.sgRNA.$P.txt for writing!\n";
+								print OUT1 "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
 						}
 					}
 				}
@@ -820,13 +840,54 @@ if ($opt_mode eq "cas9") {
 	print  "# Index file created.\n";
 	
 	#=pod
+	###################################### sgRNA on-target score ###################################
+	print LOG  "# Step6: Calculates the Seq-deepCpf1 score for the given sgRNA.\n";
+	print  "# Step6: Calculates the Seq-deepCpf1 score for the given sgRNA.\n";
+	
+	for (my $j=1; $j<=$file_num; $j++) {
+		if (-e "$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.txt") {
+			my $line1 = `wc -l $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.txt`;
+			my $line2 = `wc -l $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.txt`;
+			if ($line1) {
+				$line1 =$& if ($line1 =~ /^(\d+)/);
+			}
+			if ($line2) {
+				$line2 =$& if ($line2 =~ /^(\d+)/);
+			}
+			if ($line1 == $line2) {
+				system("rm $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.txt");
+				next;
+			}
+		}
+		$pm->start and next;
+		my @args_rs2 = ("python","DeepCpf1_Code/DeepCpf1.py","$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.txt","$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.txt");
+		LABEL1:{
+			system(@args_rs2);
+			if($? == -1) {
+				die "system @args_rs2 failed: $?";
+				redo LABEL1;
+			}
+			$pm->finish;
+		}
+	}
+	$pm->wait_all_children;
 	
 	###################################### seqmap ###################################
-	print  "# Step6: Mapping Possible sgRNA to potential off-target sites.\n";
-	print LOG  "# Step6: Mapping Possible sgRNA to potential off-target sites.\n";
+	print  "# Step7: Mapping Possible sgRNA to potential off-target sites.\n";
+	print LOG  "# Step7: Mapping Possible sgRNA to potential off-target sites.\n";
 	for (my $j=1; $j<=$file_num; $j++) {
 		$pm->start and next;
-		my $args_seqmap = ("./seqmap-1.0.12-linux-64 4 $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.fasta $dir/$label.Potential.off.target/$label.POT.fasta $dir/$label.Seqmap.result/$label.seqmap_output.$j.txt /output_all_matches /skip_N /no_duplicate_probes /forward_strand /silent >> $dir/$label.Seqmap.result/$label.seqmap.LOG.txt");
+		open (TXT,"$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.txt") or die;
+		open (FAS,">$dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.fasta") or die;
+		readline TXT;
+		while (<TXT>){
+			chomp;
+			my ($Deep_id,$Deep_seq,$Deep_score) = (split "\t",$_)[0,1,3];
+			$Deep_seq = substr($Deep_seq,4+$PAM_len,$spacer);
+			print FAS "$Deep_id#$Deep_score\n$Deep_seq\n";
+		}
+		close TXT;close FAS;
+		my $args_seqmap = ("./seqmap-1.0.12-linux-64 4 $dir/$label.Possible.sgRNA/$label.Possible.sgRNA.$j.score.fasta $dir/$label.Potential.off.target/$label.POT.fasta $dir/$label.Seqmap.result/$label.seqmap_output.$j.txt /output_all_matches /skip_N /no_duplicate_probes /forward_strand /silent >> $dir/$label.Seqmap.result/$label.seqmap.LOG.txt");
 		LABEL2:{
 			system($args_seqmap);
 			if($? == -1) {
@@ -842,8 +903,8 @@ if ($opt_mode eq "cas9") {
 	}
 	$pm->wait_all_children;
 	############################## format seqmap result ###################################
-	print  "# Step7: Format seqmap result file.\n";
-	print LOG  "# Step7: Format seqmap result file.\n";
+	print  "# Step8: Format seqmap result file.\n";
+	print LOG  "# Step8: Format seqmap result file.\n";
 	
 	for (my $j=1; $j<=$file_num; $j++) {
 		$pm->start and next;
@@ -860,8 +921,8 @@ if ($opt_mode eq "cas9") {
 	$pm->wait_all_children;
 	
 	############################## Merging and filtering ###################################
-	print  "# Step8: Merging and filtering the Seqmap result.\n";
-	print LOG  "# Step8: Merging and filtering the Seqmap result.\n";
+	print  "# Step9: Merging and filtering the Seqmap result.\n";
+	print LOG  "# Step9: Merging and filtering the Seqmap result.\n";
 	for (my $j=1; $j<=$file_num; $j++) {
 		system("cat $dir/$label.Seqmap.result/$label.result.$j.txt >> $dir/$label.Seqmap.result/$label.result.txt");
 		unlink("$dir/$label.Seqmap.result/$label.result.$j.txt") or die "Can't delete $label.result.$j.txt";
@@ -871,7 +932,10 @@ if ($opt_mode eq "cas9") {
 	open (RES,"$dir/$label.Seqmap.result/$label.result.txt") or die;
 	while (<RES>) {
 		chomp;
-		my($gene,$position,$sgRNA_seq,$OT_gene,$OT_pos,$mismatch,$info1,$info2) = (split /\t/,$_)[0,1,2,4,5,7,8,9];
+		my($gene,$position,$sgRNA_seq,$Deep_score,$OT_gene,$OT_pos,$mismatch,$info1,$info2) = (split /\t/,$_)[0,1,2,3,4,5,7,8,9];
+		my $sgRNA_seq_guide = substr($sgRNA_seq,$PAM_len,$spacer);
+		my $sgRNA_seq_PAM = substr($sgRNA_seq,0,$PAM_len);
+		$sgRNA_seq = $sgRNA_seq_PAM."+".$sgRNA_seq_guide;
 		if (exists $sgRNA{"$gene:$position"}) {
 			if ($position ne $OT_pos) {
 				$OT{"$gene:$position"}{$mismatch}++;
@@ -885,7 +949,7 @@ if ($opt_mode eq "cas9") {
 			$OT{"$gene:$position"}{2} = 0;
 			$OT{"$gene:$position"}{3} = 0;
 			$OT{"$gene:$position"}{4} = 0;
-			$sgRNA{"$gene:$position"}="$gene\t$position\t$sgRNA_seq\tNA";
+			$sgRNA{"$gene:$position"}="$gene\t$position\t$sgRNA_seq\t$Deep_score";
 			$info{"$gene:$position"}="$info1\t$info2";
 		}
 	}
@@ -1046,8 +1110,8 @@ if ($opt_mode eq "cas9") {
 	
 	################################### Extract POT sites ###################################
 	
-	print LOG  "# Step3: Extracting potential off-target sites.(30nt)\n";
-	print  "# Step3: Extracting potential off-target sites.(30nt)\n";
+	print LOG  "# Step3: Extracting potential off-target sites.\n";
+	print  "# Step3: Extracting potential off-target sites.\n";
 	
 	my ($p, $OTseq, $pam, $pos);
 	open (OUT,">$dir/$label.Potential.off.target/$label.POT.fasta") or die "Can't open $label.POT.fasta for writing!\n";
@@ -1228,6 +1292,10 @@ if ($opt_mode eq "cas9") {
 	while (<RES>) {
 		chomp;
 		my($gene,$position,$sgRNA_seq,$OT_gene,$OT_pos,$mismatch,$info1,$info2) = (split /\t/,$_)[0,1,2,4,5,7,8,9];
+		my $sgRNA_seq_guide = substr($sgRNA_seq,0,$spacer);
+		my $sgRNA_seq_PAM = substr($sgRNA_seq,$spacer,$PAM_len);
+		$sgRNA_seq = $sgRNA_seq_guide."+".$sgRNA_seq_PAM;
+
 		if (exists $sgRNA{"$gene:$position"}) {
 			if ($position ne $OT_pos) {
 				$OT{"$gene:$position"}{$mismatch}++;
@@ -1286,7 +1354,7 @@ if ($opt_mode eq "cas9") {
 system("rm -rf $dir/$label.Seqmap.result");
 system("rm -rf $dir/$label.Potential.off.target");
 system("rm -rf $dir/$label.Possible.sgRNA");
-unlink("$dir/$label.annotation.index");
+#unlink("$dir/$label.annotation.index");
 
 my $oo = time() - $time;
 print "# Total time consumption is $oo second.\nDone!\n";
