@@ -48,29 +48,33 @@ For Cpf1 mode:
 
 For Custom mode:
 
-	perl $0 -m custom -i Your_data.fastq -o /your_dir/ -l ZmB73 -t NRG -p 10 -x 20
+	perl $0 -m custom -i Your_data.fastq -o /your_dir/ -t NRG -p 10 -x 20
 
---- Options ---
+--- Required ---
 
-	-h: show this help
-
-	-m <string>	:The sgRNA designing mode: Cas9, Cpf1 and Custom (default: Cas9)
+	-m <string>	:Given specific PAM for sgRNA design : Cas9, Cpf1 or Custom (default: Cas9)
 
 	  Cas9		:On-target: 20 nt protospacer + NGG, off-target: 20 nt + NRG
 	  Cpf1		:On-target: TTTN/TTN + 23/24/25 nt protospacer
 	  Custom	:On-target: 15-25 nt protospacer + custom PAM sequence
 
-	-i <string>	:reference genome sequence file
-	-g <string>	:reference genome annotation file
-	-o <string>	:Output path (defualt: $dir_default)
+	-i <string>	:User's sequence file (In bam, fastq or fasta format)
+	-g <string>	:Genome annotation file (This parameter is required only if the format of sequence file is bam)
+
+--- Options ---
+
+	-o <string>	:Output path (defualt: current directory)
 	-p <int>	:The number of process to use (default:1)
+
+	-h: show this help
 	
-	If Cpf1 and Custom mode:
+	For Cpf1 and Custom mode:
 
 	  -x <int>	:Cpf1: Length of spacer: between 23 to 25 (default: 24 nt);
 			:Custom: Length of spacer: between 15 to 25 (default: 20 nt);
 	  -t <string>	:Cpf1: Type of PAM sequence: TTX or TTTX (X: One of A C G T R Y M K S W H B V D N; default: TTTN)
 			:Custom: Type of PAM sequence (default: NGG)
+
 };
 
 err( $helpmsg ) if $opt_help;
@@ -119,7 +123,7 @@ if (!$Input) {
 }
 
 print "\n  Welcome to CRISPR-Local\n";
-print "  ---a local tool for high-throughput CRISPR single-guide RNA (sgRNA) design in plants.\n";
+print "  ---A local single-guide RNA (sgRNA) design tool for non-reference plant genomes.\n";
 print "  ---------------------------------------------------------\n";
 print " Version   : 1.0"."\n";
 print " Copyright : Free software"."\n";
@@ -142,9 +146,9 @@ if ($opt_mode eq "cas9") {
 	
 		print  LOG "######################################### Log #########################################". "\n\n";
 		print  LOG "#                                     CRISPR-Local                                        " ."\n";
-		print  LOG "#  ---a local tool for high-throughput CRISPR single-guide RNA (sgRNA) design in plants." ."\n";          
+		print  LOG "#  ---A local single-guide RNA (sgRNA) design tool for non-reference plant genomes." ."\n";          
 		print  LOG "#                                                                                         " ."\n";
-		print  LOG "#             contact:  Jiamin Sun, MaizeGo, Email: sunjm0824\@webmail.hzau.edu.cn                    \n\n";
+		print  LOG "#         contact:  Jiamin Sun, MaizeGo, Email: sunjm0824\@webmail.hzau.edu.cn                    \n\n";
 		print  LOG "# Time, begin at $local_time."."\n";
 		print  LOG "# Program UD-build: CRISPR sgRNA design by using user's data.\n\n";
 	
@@ -887,12 +891,13 @@ if ($opt_mode eq "cas9") {
 					$P = sprintf("%02d",$P);
 					if (-e "$outdir/$filename.$chr.gene.txt.part$P") {
 						open (IN,"$outdir/$filename.$chr.gene.txt.part$P") or die;
-						open (OUT,">$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.fasta.part$P") or die "Can't open $filename.$chr.gene.sgRNA.fasta for writing!\n";
+						open (OUT,">$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.part$P") or die "Can't open $filename.$chr.gene.sgRNA.part$P for writing!\n";
+						print OUT "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
 						while (<IN>) {
 							chomp;
 							my ($gene,$chr,$pos,$seq) = split /\t/,$_;
-							while ($seq =~ /(?=($PAM_type\w{$spacer}))/g) {
-								$A_pos = int($pos + pos($seq));
+							while ($seq =~ /(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+								$A_pos = int($pos + pos($seq) + 4);
 								$Reads = $1;
 								my $proto = substr($1,$PAM_len);
 								unless ($proto=~/N|T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
@@ -901,8 +906,8 @@ if ($opt_mode eq "cas9") {
 							}
 							$seq = reverse $seq;
 							$seq =~ tr/AGCT/TCGA/;
-							while ($seq =~ /(?=($PAM_type\w{$spacer}))/g) {
-								$A_pos = int($pos + length($seq) - pos($seq) - $PAM_len - $spacer);
+							while ($seq =~ /(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+								$A_pos = int($pos + length($seq) - (pos($seq) + 4) - $PAM_len - $spacer);
 								$Reads = $1;
 								my $proto = substr($1,$PAM_len);
 								unless ($proto=~/N|T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
@@ -913,7 +918,7 @@ if ($opt_mode eq "cas9") {
 						close IN;
 						foreach my $key1 (sort keys %hash) {
 							foreach my $key2 (sort keys %{$hash{$key1}}) {
-								print OUT ">$key1\#$hash{$key1}{$key2}\n$key2\n";
+								print OUT "$key1\#$hash{$key1}{$key2}\t$key2\t1\n";
 							}
 						}
 						close OUT;undef %hash;
@@ -921,12 +926,13 @@ if ($opt_mode eq "cas9") {
 					}
 					if (-e "$outdir/$filename.$chr.intergenic.txt.part$P") {
 						open (IN,"$outdir/$filename.$chr.intergenic.txt.part$P") or die;
-						open (OUT,">$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.fasta.part$P") or die "Can't open $filename.$chr.intergenic.sgRNA.fasta for writing!\n";
+						open (OUT,">$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.part$P") or die "Can't open $filename.$chr.intergenic.sgRNA.part$P for writing!\n";
+						print OUT "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
 						while (<IN>) {
 							chomp;
 							my ($chr,$pos,$seq) = (split /\t/,$_)[1,2,3];
-							while ($seq =~ /(?=($PAM_type\w{$spacer}))/g) {
-								$A_pos = int($pos + pos($seq));
+							while ($seq =~ /(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+								$A_pos = int($pos + pos($seq) + 4);
 								$Reads = $1;
 								my $proto = substr($1,$PAM_len);
 								unless ($proto=~/N|T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
@@ -935,8 +941,8 @@ if ($opt_mode eq "cas9") {
 							}
 							$seq = reverse $seq;
 							$seq =~ tr/AGCT/TCGA/;
-							while ($seq =~ /(?=($PAM_type\w{$spacer}))/g) {
-								$A_pos = int($pos + length($seq) - pos($seq) - $PAM_len - $spacer);
+							while ($seq =~ /(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+								$A_pos = int($pos + length($seq) - (pos($seq) + 4) - $PAM_len - $spacer);
 								$Reads = $1;
 								my $proto = substr($1,$PAM_len);
 								unless ($proto=~/N|T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
@@ -947,7 +953,7 @@ if ($opt_mode eq "cas9") {
 						close IN;
 						foreach my $key1 (sort keys %hash) {
 							foreach my $key2 (sort keys %{$hash{$key1}}) {
-								print OUT ">$key1\#$hash{$key1}{$key2}\n$key2\n";
+								print OUT "$key1\#$hash{$key1}{$key2}\t$key2\t1\n";
 							}
 						}
 						close OUT;undef %hash;
@@ -958,6 +964,41 @@ if ($opt_mode eq "cas9") {
 				$pm->wait_all_children;
 			}
 
+			my %gene_file;my %inter_file;
+			foreach my $chr (@SQ) {
+				for (my $P=0;$P < $process;$P++) {
+					$P = sprintf("%02d",$P);
+					if (-e "$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.part$P") {
+						$gene_file{"$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.part$P"} = "$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.score.part$P";
+					}
+					if (-e "$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.part$P") {
+						$inter_file{"$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.part$P"} = "$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.score.part$P";
+					}			
+				}
+			}
+			print LOG  "# Calculates the on-target score for the sgRNA.\n";
+			print  "# Calculates the on-target score for the sgRNA.\n";
+	
+			foreach my $key1 (sort keys %gene_file) {
+				$pm->start and next;
+				my @gene_rs2 = ("python","DeepCpf1_Code/DeepCpf1.py","$key1","$gene_file{$key1}");
+				system(@gene_rs2);
+				if($? == -1) {
+					die "system @gene_rs2 failed: $?";
+				}
+				$pm->finish;
+			}
+			$pm->wait_all_children;
+			foreach my $key2 (sort keys %inter_file) {
+				$pm->start and next;
+				my @intergene_rs2 = ("python","DeepCpf1_Code/DeepCpf1.py","$key2","$inter_file{$key2}");
+				system(@intergene_rs2);
+				if($? == -1) {
+					die "system @intergene_rs2 failed: $?";
+				}
+				$pm->finish;
+			}
+			$pm->wait_all_children;
 			print LOG  "# Output the user's database.\n";
 			print  "# Output the user's database.\n";
 			open (REG,">$outdir/$filename.User.sgRNA/$filename.gene.sgRNA.db.alignment.txt") or die;
@@ -965,33 +1006,39 @@ if ($opt_mode eq "cas9") {
 			foreach my $chr (@SQ) {
 				for (my $P = 0;$P < $process;$P++) {
 					$P = sprintf("%02d",$P);
-					if (-e "$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.fasta.part$P") {
-						open (IN, "$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.fasta.part$P") or die;
+					if (-e "$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.score.part$P") {
+						open (IN, "$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.score.part$P") or die;
+						readline IN;
 						while (<IN>) {
 							chomp;
-							if ($_=~s/^>//) {
-								my ($id,$pos,$num) = (split "#",$_);
-								print REG "$id\t$pos\t$num\tNA\t";
-							}else{
-								print REG "$_\n";
-							}
+							my ($Deep_id,$Deep_seq,$Deep_score) = (split "\t",$_)[0,1,3];
+							$Deep_seq = substr($Deep_seq,4,$PAM_len+$spacer);
+							my $sgRNA_seq_guide = substr($Deep_seq,$PAM_len,$spacer);
+							my $sgRNA_seq_PAM = substr($Deep_seq,0,$PAM_len);
+							$Deep_seq = $sgRNA_seq_PAM."+".$sgRNA_seq_guide;
+							my ($id,$pos,$num) = (split "#",$Deep_id);
+							print REG "$id\t$pos\t$num\t$Deep_score\t$Deep_seq\n";
 						}
 						close IN;
-						unlink ("$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.fasta.part$P") or die;
+						unlink ("$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.part$P") or die;
+						unlink ("$outdir/$filename.User.sgRNA/$filename.$chr.gene.sgRNA.score.part$P") or die;
 					}
-					if (-e "$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.fasta.part$P") {
-						open (IN, "$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.fasta.part$P") or die;
+					if (-e "$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.score.part$P") {
+						open (IN, "$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.score.part$P") or die;
+						readline IN;
 						while (<IN>) {
 							chomp;
-							if ($_=~s/^>//) {
-								my ($pos,$num) = (split "#",$_)[1,2];
-								print REI "Intergenic\t$pos\t$num\tNA\t";
-							}else{
-								print REI "$_\n";
-							}
+							my ($Deep_id,$Deep_seq,$Deep_score) = (split "\t",$_)[0,1,3];
+							$Deep_seq = substr($Deep_seq,4,$PAM_len+$spacer);
+							my $sgRNA_seq_guide = substr($Deep_seq,$PAM_len,$spacer);
+							my $sgRNA_seq_PAM = substr($Deep_seq,0,$PAM_len);
+							$Deep_seq = $sgRNA_seq_PAM."+".$sgRNA_seq_guide;
+							my ($pos,$num) = (split "#",$Deep_id)[1,2];
+							print REI "Intergenic\t$pos\t$num\t$Deep_score\t$Deep_seq\n";
 						}
 						close IN;
-						unlink ("$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.fasta.part$P") or die;
+						unlink ("$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.part$P") or die;
+						unlink ("$outdir/$filename.User.sgRNA/$filename.$chr.intergenic.sgRNA.score.part$P") or die;
 					}
 				}
 			}
@@ -1008,24 +1055,24 @@ if ($opt_mode eq "cas9") {
 			print  "# Extracting possible sgRNA from fastq file.\n";
 			my %hash;my $Reads;
 			open(FASTQ,"gzip -dc $input|") or die;
-			open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta") or die "Can't open $filename.gene.sgRNA.fasta for writing!\n";
+			open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.txt") or die "Can't open $filename.gene.sgRNA.txt for writing!\n";
 			while (<FASTQ>) {
 				if(/^@/){
 					chomp;
 					my $position=tell(FASTQ);
 					my $line_1=<FASTQ>;
-					while ($line_1 =~ /(?=($PAM_type\w{$spacer}))/g) {
+					while ($line_1 =~ /(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
 						$Reads = $1;
-						my $proto = substr($1,$PAM_len);
+						my $proto = substr($1,4+$PAM_len,$spacer);
 						unless ($proto=~/N|T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
 							$hash{$Reads}++;
 						}
 					}
 					$line_1 = reverse $line_1;
 					$line_1 =~ tr/AGCT/TCGA/;
-					while ($line_1 =~ /(?=($PAM_type\w{$spacer}))/g) {
+					while ($line_1 =~ /(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
 						$Reads = $1;
-						my $proto = substr($1,$PAM_len);
+						my $proto = substr($1,4+$PAM_len,$spacer);
 						unless ($proto=~/N|T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
 							$hash{$Reads}++;
 						}
@@ -1035,35 +1082,60 @@ if ($opt_mode eq "cas9") {
 			}
 			close (FASTQ);
 			foreach my $key (sort keys %hash) {
-				print OUT ">$filename\_sgRNA#$hash{$key}\n$key\n";
+				print OUT "$filename#$hash{$key}\t$key\n";
 			}
 			close OUT;undef %hash;
-			my $line = `wc -l $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta`;
+			my $line = `wc -l $outdir/$filename.User.sgRNA/$filename.sgRNA.txt`;
 			if ($line =~ /^(\d+)/){
 				$line = $1;
-				$line = $line / 2; 
 			}
-			my $file_line = (int($line/$process) + 1) * 2;
-			system("split -d -l $file_line $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part");
-			unlink("$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta") or die "Can't delete $filename.sgRNA.fasta file";
-	
+			my $file_line = (int($line/$process) + 1);
+			system("split -d -l $file_line $outdir/$filename.User.sgRNA/$filename.sgRNA.txt $outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part");
+			unlink("$outdir/$filename.User.sgRNA/$filename.sgRNA.txt") or die "Can't delete $filename.sgRNA.txt file";
+
+			print LOG  "# Calculates the on-target score for the sgRNA.\n";
+			print  "# Calculates the on-target score for the sgRNA.\n";
+			for (my $P=0;$P<$process;$P++) {
+				$pm->start and next;
+				$P = sprintf("%02d",$P);
+				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part$P") or die;
+				open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P") or die;
+				print OUT "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
+				while (<IN>){
+					chomp;
+					print OUT "$_\t1\n";
+				}
+				close IN;close OUT;
+				my @fqgz_rs2 = ("python","DeepCpf1_Code/DeepCpf1.py","$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P","$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P");
+				system(@fqgz_rs2);
+				if($? == -1) {
+					die "system @fqgz_rs2 failed: $?";
+				}
+				$pm->finish;
+			}
+			$pm->wait_all_children;	
+
 			print LOG  "# Output the user's database.\n";
 			print  "# Output the user's database.\n";
 			open (OUT,">$outdir/$filename.User.sgRNA/$filename.gene.sgRNA.db.fastq.txt");
 			for (my $P=0;$P<$process;$P++) {
 				$P = sprintf("%02d",$P);
-				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part$P");
+				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P");
+				readline IN;
 				while (<IN>) {
 					chomp;
-					if ($_=~s/^>//) {
-						my ($name,$num) = (split "#",$_);
-						print OUT "$name\t$num\tNA\t";
-					}else{
-						print OUT "$_\n";
-					}
+					my ($Deep_id,$Deep_seq,$Deep_score) = (split "\t",$_)[0,1,3];
+					$Deep_seq = substr($Deep_seq,4,$PAM_len+$spacer);
+					my $sgRNA_seq_guide = substr($Deep_seq,$PAM_len,$spacer);
+					my $sgRNA_seq_PAM = substr($Deep_seq,0,$PAM_len);
+					$Deep_seq = $sgRNA_seq_PAM."+".$sgRNA_seq_guide;
+					my ($name,$num) = (split "#",$Deep_id);
+					print OUT "$name\t$num\t$Deep_score\t$Deep_seq\n";					
 				}
 				close IN;
-				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P") or die;
 			}
 			close OUT;
 		}elsif ($input =~ /(fq|fastq)$/i) {
@@ -1073,24 +1145,24 @@ if ($opt_mode eq "cas9") {
 			print  "# Extracting possible sgRNA from fastq file.\n";
 			my %hash;my $Reads;
 			open(FASTQ,"$input") or die;
-			open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta") or die "Can't open $filename.gene.sgRNA.fasta for writing!\n";
+			open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.txt") or die "Can't open $filename.gene.sgRNA.txt for writing!\n";
 			while (<FASTQ>) {
 				if(/^@/){
 					chomp;
 					my $position=tell(FASTQ);
 					my $line_1=<FASTQ>;
-					while ($line_1 =~ /(?=($PAM_type\w{$spacer}))/g) {
+					while ($line_1 =~ /(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
 						$Reads = $1;
-						my $proto = substr($1,$PAM_len);
+						my $proto = substr($1,4+$PAM_len,$spacer);
 						unless ($proto=~/N|T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
 							$hash{$Reads}++;
 						}
 					}
 					$line_1 = reverse $line_1;
 					$line_1 =~ tr/AGCT/TCGA/;
-					while ($line_1 =~ /(?=($PAM_type\w{$spacer}))/g) {
+					while ($line_1 =~ /(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
 						$Reads = $1;
-						my $proto = substr($1,$PAM_len);
+						my $proto = substr($1,4+$PAM_len,$spacer);
 						unless ($proto=~/N|T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
 							$hash{$Reads}++;
 						}
@@ -1100,36 +1172,60 @@ if ($opt_mode eq "cas9") {
 			}
 			close (FASTQ);
 			foreach my $key (sort keys %hash) {
-				print OUT ">$filename\_sgRNA#$hash{$key}\n$key\n";
+				print OUT "$filename#$hash{$key}\t$key\n";
 			}
 			close OUT;undef %hash;
-			my $line = `wc -l $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta`;
+			my $line = `wc -l $outdir/$filename.User.sgRNA/$filename.sgRNA.txt`;
 			if ($line =~ /^(\d+)/){
 				$line = $1;
-				$line = $line / 2; 
 			}
-			my $file_line = (int($line/$process) + 1) * 2;
-			system("split -d -l $file_line $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part");
-			unlink("$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta") or die "Can't delete $filename.sgRNA.fasta file";
-	
+			my $file_line = (int($line/$process) + 1);
+			system("split -d -l $file_line $outdir/$filename.User.sgRNA/$filename.sgRNA.txt $outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part");
+			unlink("$outdir/$filename.User.sgRNA/$filename.sgRNA.txt") or die "Can't delete $filename.sgRNA.txt file";
+
+			print LOG  "# Calculates the on-target score for the sgRNA.\n";
+			print  "# Calculates the on-target score for the sgRNA.\n";
+			for (my $P=0;$P<$process;$P++) {
+				$pm->start and next;
+				$P = sprintf("%02d",$P);
+				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part$P") or die;
+				open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P") or die;
+				print OUT "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
+				while (<IN>){
+					chomp;
+					print OUT "$_\t1\n";
+				}
+				close IN;close OUT;
+				my @fqgz_rs2 = ("python","DeepCpf1_Code/DeepCpf1.py","$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P","$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P");
+				system(@fqgz_rs2);
+				if($? == -1) {
+					die "system @fqgz_rs2 failed: $?";
+				}
+				$pm->finish;
+			}
+			$pm->wait_all_children;	
+
 			print LOG  "# Output the user's database.\n";
 			print  "# Output the user's database.\n";
 			open (OUT,">$outdir/$filename.User.sgRNA/$filename.gene.sgRNA.db.fastq.txt");
 			for (my $P=0;$P<$process;$P++) {
 				$P = sprintf("%02d",$P);
-				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part$P");
-				my $pam;
+				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P");
+				readline IN;
 				while (<IN>) {
 					chomp;
-					if ($_=~s/^>//) {
-						my ($name,$num) = (split "#",$_);
-						print OUT "$name\t$num\tNA\t";
-					}else{
-						print OUT "$_\n";
-					}
+					my ($Deep_id,$Deep_seq,$Deep_score) = (split "\t",$_)[0,1,3];
+					$Deep_seq = substr($Deep_seq,4,$PAM_len+$spacer);
+					my $sgRNA_seq_guide = substr($Deep_seq,$PAM_len,$spacer);
+					my $sgRNA_seq_PAM = substr($Deep_seq,0,$PAM_len);
+					$Deep_seq = $sgRNA_seq_PAM."+".$sgRNA_seq_guide;
+					my ($name,$num) = (split "#",$Deep_id);
+					print OUT "$name\t$num\t$Deep_score\t$Deep_seq\n";					
 				}
 				close IN;
-				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P") or die;
 			}
 			close OUT;
 		}
@@ -1154,55 +1250,80 @@ if ($opt_mode eq "cas9") {
 			close FASTA;
 			print LOG  "# Extracting possible sgRNA from fasta file.\n";
 			print  "# Extracting possible sgRNA from fasta file.\n";
-			open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta") or die;
+			open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.txt") or die;
 			foreach my $contig_id (sort keys %contig) {
 				my $length = length($contig{$contig_id});
-				while ($contig{$contig_id}=~/(?=($PAM_type\w{$spacer}))/g) {
-					$pos = pos($contig{$contig_id});
+				while ($contig{$contig_id}=~/(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+					$pos = pos($contig{$contig_id}) + 4;
 					$reads = $1;
-					my $proto = substr($1,$PAM_len);
+					my $proto = substr($1,4+$PAM_len,$spacer);
 					unless ($proto=~/[^AGCT]/ or $proto=~/T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
-						print OUT ">$contig_id\#+$pos\n$reads\n";
+						print OUT "$contig_id\#+$pos\t$reads\n";
 					}
 				}
 				$contig{$contig_id} = reverse $contig{$contig_id};
 				$contig{$contig_id} =~ tr/ACGT/TGCA/;
-				while ($contig{$contig_id}=~/(?=($PAM_type\w{$spacer}))/g) {
-					$pos = $length - pos($contig{$contig_id}) - $PAM_len - $spacer;
+				while ($contig{$contig_id}=~/(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+					$pos = $length - (pos($contig{$contig_id}) + 4) - $PAM_len - $spacer;
 					$reads = $1;
-					my $proto = substr($1,$PAM_len);
+					my $proto = substr($1,4+$PAM_len,$spacer);
 					unless ($proto=~/[^AGCT]/ or $proto=~/T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
-						print OUT ">$contig_id\#-$pos\n$reads\n";	
+						print OUT "$contig_id\#-$pos\t$reads\n";	
 					}
 				}
 			}
 			close OUT;
-			my $line = `wc -l $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta`;
+			my $line = `wc -l $outdir/$filename.User.sgRNA/$filename.sgRNA.txt`;
 			if ($line =~ /^(\d+)/){
 				$line = $1;
-				$line = $line / 2; 
 			}
-			my $file_line = (int($line/$process) + 1) * 2;
-			system("split -d -l $file_line $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part");
-			unlink("$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta") or die "Can't delete $filename.sgRNA.fasta file";
-	
+			my $file_line = (int($line/$process) + 1);
+			system("split -d -l $file_line $outdir/$filename.User.sgRNA/$filename.sgRNA.txt $outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part");
+			unlink("$outdir/$filename.User.sgRNA/$filename.sgRNA.txt") or die "Can't delete $filename.sgRNA.txt file";
+
+			print LOG  "# Calculates the on-target score for the sgRNA.\n";
+			print  "# Calculates the on-target score for the sgRNA.\n";
+			for (my $P=0;$P<$process;$P++) {
+				$pm->start and next;
+				$P = sprintf("%02d",$P);
+				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part$P") or die;
+				open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P") or die;
+				print OUT "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
+				while (<IN>){
+					chomp;
+					print OUT "$_\t1\n";
+				}
+				close IN;close OUT;
+				my @fqgz_rs2 = ("python","DeepCpf1_Code/DeepCpf1.py","$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P","$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P");
+				system(@fqgz_rs2);
+				if($? == -1) {
+					die "system @fqgz_rs2 failed: $?";
+				}
+				$pm->finish;
+			}
+			$pm->wait_all_children;	
+
 			print LOG  "# Output the user's database.\n";
 			print  "# Output the user's database.\n";
 			open (OUT,">$outdir/$filename.User.sgRNA/$filename.gene.sgRNA.db.fasta.txt");
 			for (my $P=0;$P<$process;$P++) {
 				$P = sprintf("%02d",$P);
-				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part$P");
+				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P");
+				readline IN;
 				while (<IN>) {
 					chomp;
-					if ($_=~s/^>//) {
-						my ($id,$pos) = split "#",$_;
-						print OUT "$id\t$pos\tNA\t";
-					}else{
-						print OUT "$_\n";
-					}
+					my ($Deep_id,$Deep_seq,$Deep_score) = (split "\t",$_)[0,1,3];
+					$Deep_seq = substr($Deep_seq,4,$PAM_len+$spacer);
+					my $sgRNA_seq_guide = substr($Deep_seq,$PAM_len,$spacer);
+					my $sgRNA_seq_PAM = substr($Deep_seq,0,$PAM_len);
+					$Deep_seq = $sgRNA_seq_PAM."+".$sgRNA_seq_guide;
+					my ($id,$pos) = (split "#",$Deep_id);
+					print OUT "$id\t$pos\t$Deep_score\t$Deep_seq\n";					
 				}
 				close IN;
-				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P") or die;
 			}
 			close OUT;
 		}elsif ($input =~ /(fa|fasta)$/i) {
@@ -1224,55 +1345,80 @@ if ($opt_mode eq "cas9") {
 			close FASTA;
 			print LOG  "# Extracting possible sgRNA from fasta file.\n";
 			print  "# Extracting possible sgRNA from fasta file.\n";
-			open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta") or die;
+			open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.txt") or die;
 			foreach my $contig_id (sort keys %contig) {
 				my $length = length($contig{$contig_id});
-				while ($contig{$contig_id}=~/(?=($PAM_type\w{$spacer}))/g) {
-					$pos = pos($contig{$contig_id});
+				while ($contig{$contig_id}=~/(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+					$pos = pos($contig{$contig_id}) + 4;
 					$reads = $1;
-					my $proto = substr($1,$PAM_len);
+					my $proto = substr($1,4+$PAM_len,$spacer);
 					unless ($proto=~/[^AGCT]/ or $proto=~/T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
-						print OUT ">$contig_id\#+$pos\n$reads\n";
+						print OUT "$contig_id\#+$pos\t$reads\n";
 					}
 				}
 				$contig{$contig_id} = reverse $contig{$contig_id};
 				$contig{$contig_id} =~ tr/ACGT/TGCA/;
-				while ($contig{$contig_id}=~/(?=($PAM_type\w{$spacer}))/g) {
-					$pos = $length - pos($contig{$contig_id}) - $PAM_len - $spacer;
+				while ($contig{$contig_id}=~/(?=(\w{4}$PAM_type\w{$spacer}\w{4}))/g) {
+					$pos = $length - (pos($contig{$contig_id}) + 4) - $PAM_len - $spacer;
 					$reads = $1;
-					my $proto = substr($1,$PAM_len);
+					my $proto = substr($1,4+$PAM_len,$spacer);
 					unless ($proto=~/[^AGCT]/ or $proto=~/T{4,20}|A{5,20}|C{5,20}|G{5,20}|(AT){6,10}|(AC){6,10}|(AG){6,10}|(TA){6,10}|(TC){6,10}|(TG){6,10}|(CA){6,10}|(CT){6,10}|(CG){6,10}|(GA){6,10}|(GT){6,10}|(GC){6,10}|(AAC){5,7}|(AAG){5,7}|(ATA){5,7}|(ATT){5,7}|(ATC){5,7}|(ATG){5,7}|(ACA){5,7}|(ACT){5,7}|(ACC){5,7}|(ACG){5,7}|(AGA){5,7}|(AGT){5,7}|(AGC){5,7}|(AGG){5,7}|(TAA){5,7}|(TAT){5,7}|(TAC){5,7}|(TAG){5,7}|(TTA){5,7}|(TTC){5,7}|(TTG){5,7}|(TCA){5,7}|(TCT){5,7}|(TCC){5,7}|(TCG){5,7}|(TGA){5,7}|(TGT){5,7}|(TGC){5,7}|(TGG){5,7}|(CAA){5,7}|(CAT){5,7}|(CAC){5,7}|(CAG){5,7}|(CTA){5,7}|(CTT){5,7}|(CTC){5,7}|(CTG){5,7}|(CCA){5,7}|(CCT){5,7}|(CCG){5,7}|(CGA){5,7}|(CGT){5,7}|(CGC){5,7}|(CGG){5,7}|(GAA){5,7}|(GAT){5,7}|(GAC){5,7}|(GAG){5,7}|(GTA){5,7}|(GTT){5,7}|(GTC){5,7}|(GTG){5,7}|(GCA){5,7}|(GCT){5,7}|(GCC){5,7}|(GCG){5,7}|(GGA){5,7}|(GGT){5,7}|(GGC){5,7}/) {
-						print OUT ">$contig_id\#-$pos\n$reads\n";	
+						print OUT "$contig_id\#-$pos\t$reads\n";	
 					}
 				}
 			}
 			close OUT;
-			my $line = `wc -l $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta`;
+			my $line = `wc -l $outdir/$filename.User.sgRNA/$filename.sgRNA.txt`;
 			if ($line =~ /^(\d+)/){
 				$line = $1;
-				$line = $line / 2; 
 			}
-			my $file_line = (int($line/$process) + 1) * 2;
-			system("split -d -l $file_line $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta $outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part");
-			unlink("$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta") or die "Can't delete $filename.sgRNA.fasta file";
-	
+			my $file_line = (int($line/$process) + 1);
+			system("split -d -l $file_line $outdir/$filename.User.sgRNA/$filename.sgRNA.txt $outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part");
+			unlink("$outdir/$filename.User.sgRNA/$filename.sgRNA.txt") or die "Can't delete $filename.sgRNA.txt file";
+
+			print LOG  "# Calculates the on-target score for the sgRNA.\n";
+			print  "# Calculates the on-target score for the sgRNA.\n";
+			for (my $P=0;$P<$process;$P++) {
+				$pm->start and next;
+				$P = sprintf("%02d",$P);
+				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part$P") or die;
+				open (OUT,">$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P") or die;
+				print OUT "sgRNA_id\tsgRNA_seq\tchromatin_accessibility\n";
+				while (<IN>){
+					chomp;
+					print OUT "$_\t1\n";
+				}
+				close IN;close OUT;
+				my @fqgz_rs2 = ("python","DeepCpf1_Code/DeepCpf1.py","$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P","$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P");
+				system(@fqgz_rs2);
+				if($? == -1) {
+					die "system @fqgz_rs2 failed: $?";
+				}
+				$pm->finish;
+			}
+			$pm->wait_all_children;	
+
 			print LOG  "# Output the user's database.\n";
 			print  "# Output the user's database.\n";
 			open (OUT,">$outdir/$filename.User.sgRNA/$filename.gene.sgRNA.db.fasta.txt");
 			for (my $P=0;$P<$process;$P++) {
 				$P = sprintf("%02d",$P);
-				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part$P");
+				open (IN,"$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P");
+				readline IN;
 				while (<IN>) {
 					chomp;
-					if ($_=~s/^>//) {
-						my ($id,$pos) = split "#",$_;
-						print OUT "$id\t$pos\tNA\t";
-					}else{
-						print OUT "$_\n";
-					}
+					my ($Deep_id,$Deep_seq,$Deep_score) = (split "\t",$_)[0,1,3];
+					$Deep_seq = substr($Deep_seq,4,$PAM_len+$spacer);
+					my $sgRNA_seq_guide = substr($Deep_seq,$PAM_len,$spacer);
+					my $sgRNA_seq_PAM = substr($Deep_seq,0,$PAM_len);
+					$Deep_seq = $sgRNA_seq_PAM."+".$sgRNA_seq_guide;
+					my ($id,$pos) = (split "#",$Deep_id);
+					print OUT "$id\t$pos\t$Deep_score\t$Deep_seq\n";					
 				}
 				close IN;
-				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.fasta.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.txt.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.tmp.part$P") or die;
+				unlink ("$outdir/$filename.User.sgRNA/$filename.sgRNA.score.tmp.part$P") or die;
 			}
 			close OUT;
 		}
