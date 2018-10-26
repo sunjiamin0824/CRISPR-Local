@@ -57,7 +57,7 @@ For Custom mode:
 
 --- Required ---
 	
-	-m <string>	:The sgRNA designing mode: Cas9, Cpf1 and Custom (default: Cas9)
+	-m <string>	:Given specific PAM for sgRNA design : Cas9, Cpf1 or Custom (default: Cas9)
 
 	  Cas9		:On-target: 20 nt protospacer + NGG, off-target: 20 nt + NRG
 	  Cpf1		:On-target: TTTN/TTN + 23/24/25 nt protospacer
@@ -72,12 +72,12 @@ For Custom mode:
 	-l <string>	:Name prefix for output file (default: CRISPR)
 	-p <int>	:The number of process to use (default:1)
 
-	If Cas9 mode:
+	For Cas9:
 
 	 -U <int>	:An integer specifying the number of base pairs expanding 5'-end of exon boundary (default: 0, >15 is not allowed)
 	 -D <int>	:An integer specifying the number of base pairs expanding 3'-end of exon boundary (default: 0, >3 is not allowed)
 
-	Or, if Cpf1 and Custom mode:
+	For Cpf1 or Custom:
 
 	  -x <int>	:Cpf1: Length of spacer: between 23 to 25 (default: 24 nt);
 			:Custom: Length of spacer: between 15 to 25 (default: 20 nt);
@@ -153,15 +153,15 @@ open  (LOG, ">$dir/$label.Log.txt") || die "Can't open $label.Log.txt for writin
 print  LOG "######################################### Log #########################################". "\n\n";
 #print "Writing Log information.                                                                      " ."\n";
 print  LOG "#                                     CRISPR-Local                                        " ."\n";
-print  LOG "#  ---a local tool for high-throughput CRISPR single-guide RNA (sgRNA) design in plants." ."\n";          
+print  LOG "#  ---A local single-guide RNA (sgRNA) design tool for non-reference plant genomes." ."\n";          
 print  LOG "#                                                                                         " ."\n";
-print  LOG "#             contact:  Jiamin Sun, MaizeGo, Email: sunjm0824\@webmail.hzau.edu.cn                    \n\n";
+print  LOG "#         contact:  Jiamin Sun, MaizeGo, Email: sunjm0824\@webmail.hzau.edu.cn                    \n\n";
 ######
 
 
 
 print "\n  Welcome to CRISPR-Local\n";
-print " ---a local tool for high-throughput CRISPR single-guide RNA (sgRNA) design in plants.\n";
+print " ---A local single-guide RNA (sgRNA) design tool for non-reference plant genomes.\n";
 print "  ---------------------------------------------------------\n";
 print " Version   : 1.0"."\n";
 print " Copyright : Free software"."\n";
