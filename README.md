@@ -24,7 +24,7 @@ For genome editing experiments, it is critical to design a reliable single-guide
 * Program DB-search would compare the RD with the UD, and the results consist of three parts: The sgRNAs present exclusively in RD (RD only, RO) or UD (UD only, UO), or both (BO). Generally, the sgRNAs from BO is preferential, and cautions should be required for UO, and RO is strongly not recommended especially when the supplied NGS data is adequate enough. 
 * PL-search is typically designed for editing multiple paralogs to address redundancy concerns, like knocking out multiple key genes for several pathways determining one phenotype. This step follows the function of above DB-search mode that distinguish targets to RO, UO or BO. Moreover, PL-search will additionally partition the targets to common (suits to all candidates) and exclusive (individually matched) according to any submitted list of genes.
 
-###Prerequisites:
+### Prerequisites:
 The following software and libraries are additionally required: Seqmap (version: 1.0.12), Samtools (>1.3.1), Python (>2.7) with the scikit-learn (0.16.1), biopython, pandas, keras, numpy, and scipy libraries, and Perl (>5.10) with the Parallel::ForkManager, File::Basename, Getopt::Long, Data::Dumper, Cwd modules. Most of the installation steps are fully automatic using a simple command line on a Linux system. 
 
 ### 1.Prepare CRISPR-Local input (fasta/genome) files
