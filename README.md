@@ -387,3 +387,4 @@ Example:
       Column 13 : The frequency of sgRNA in UD.
 ```
 Please forward any question and suggestion about CRISPR-Local to: sunjm0824@webmail.hzau.edu.cn
+For other technical issues about CRISPR-P 2.0, please contact: liuhao1122@webmail.hzau.edu.cn
