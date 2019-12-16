@@ -37,12 +37,12 @@ if __name__ == '__main__':
     o = open(output,'w')
     seq={}
     for line in i:
-	if line.startswith('>'):
-		name = line.replace('\n','')
-	else:
-		seq[name]=line.replace('\n','')
-		score = model_comparison.predict(seq[name], aa_cut, per_peptide, model=model)
-		o.write(name + '#%.6f'% (score) + '\n' + seq[name][4:24] + '\n')
+        if line.startswith('>'):
+                name = line.replace('\n','')
+        else:
+                seq[name]=line.replace('\n','')
+                score = model_comparison.predict(seq[name], aa_cut, per_peptide, model=model)
+                o.write(name + '#%.6f'% (score) + '\n' + seq[name][4:24] + '\n')
     i.close()
     o.close()
     os.remove(input)
