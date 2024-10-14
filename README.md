@@ -1,5 +1,10 @@
 CRISPR-Local
 ============
+
+Please forward any question and suggestion about CRISPR-Local to: 
+## sunjiamin0824@qq.com
+The original email address 'sunjm0824@webmail.hzau.edu.cn' has been deactivated.
+
 ## A local single-guide RNA (sgRNA) design tool for non-reference plant genomes.
 ### Motivation:
 For genome editing experiments, it is critical to design a reliable single-guide RNA (sgRNA). However, most existing tools are limited to reference genome and do not consider variations in genetic background. Taking this variation into account is especially important for plant genome editing studies, since the transformed lines are rarely the sequenced reference genomes and the presence of large diversity between them.
@@ -386,6 +391,5 @@ Example:
       Column 12 : The sgRNAs exist in UD are indicated with "UD" mark, else indicated with "RD" mark.
       Column 13 : The frequency of sgRNA in UD.
 ```
-Please forward any question and suggestion about CRISPR-Local to: sunjm0824@webmail.hzau.edu.cn
 
 For other technical issues about CRISPR-P 2.0, please contact: liuhao1122@webmail.hzau.edu.cn
